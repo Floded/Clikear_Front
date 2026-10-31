@@ -4,6 +4,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
+const TODAY = new Date().toISOString().slice(0, 10);
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -93,7 +95,7 @@ export function CustodyTab() {
   const startReturn = (assignment: Assignment) => {
     setReturnTarget(assignment);
     setReturnQty(String(assignment.quantityAssigned));
-    setReturnDate(new Date().toISOString().slice(0, 10));
+    setReturnDate(TODAY);
     setReturnNotes("");
   };
 

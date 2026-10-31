@@ -17,6 +17,15 @@ export interface InventoryItemsQuery {
   limit?: number;
 }
 
+export async function createInventoryItem(input: {
+  name: string;
+  description?: string;
+  supplierId?: number;
+  availableQuantity: number;
+}): Promise<InventoryItem> {
+  const { data } = await api.post<InventoryItem>("/inventory-items", input);
+  return data;
+}
 export async function fetchInventoryItems(
   query: InventoryItemsQuery,
 ): Promise<Paginated<InventoryItem>> {

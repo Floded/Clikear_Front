@@ -33,16 +33,36 @@ export async function fetchTicketDetail(id: string): Promise<TicketDetail> {
 export async function updateTicketStatus(
   id: string,
   status: string,
-): Promise<TicketDetail> {
-  const { data } = await api.patch<TicketDetail>(`/tickets/${id}/status`, {
-    status,
-  });
+): Promise<{ ticketId: string; status: string }> {
+  const { data } = await api.patch<{ ticketId: string; status: string }>(
+    `/tickets/${id}/status`,
+    { status },
+  );
   return data;
 }
 
 export async function fetchTechnicians(): Promise<Paginated<Technician>> {
   const { data } = await api.get<Paginated<Technician>>("/technicians", {
     params: { limit: 100 },
+  });
+  return data;
+}
+
+export async function createTicket(input: {
+  ticketId: bigint;
+  establishmentCue?: string;
+  title: string;
+  status?: string;
+  glpiClosedTicket?: string;
+  openingTimestamp?: Date;
+}): Promise<{ ticketId: string }> {
+  const { data } = await api.post<{ ticketId: string }>("/tickets", {
+    ticketId: input.ticketId.toString(),
+    establishmentCue: input.establishmentCue,
+    title: input.title,
+    status: input.status,
+    glpiClosedTicket: input.glpiClosedTicket,
+    openingTimestamp: input.openingTimestamp?.toISOString(),
   });
   return data;
 }

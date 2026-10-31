@@ -9,6 +9,7 @@ import { fetchTickets, fetchTechnicians } from "@/features/tickets/tickets.api";
 import { TicketFilters, type TicketFiltersState } from "@/features/tickets/ticket-filters";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
 import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog";
+import { NewTicketDialog } from "@/features/tickets/new-ticket-dialog";
 import type { TicketListItem } from "@/features/tickets/tickets.types";
 
 const EMPTY_FILTERS: TicketFiltersState = {
@@ -23,6 +24,7 @@ export function TicketsPage() {
   const [page, setPage] = useState(1);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [newTicketOpen, setNewTicketOpen] = useState(false);
 
   const queryFilters = useMemo(
     () => ({
@@ -67,11 +69,14 @@ export function TicketsPage() {
 
   return (
     <section className="mx-auto max-w-6xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Tickets</h1>
-        <p className="text-sm text-muted-foreground">
-          Hojas de ruta y tickets por establecimiento.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Tickets</h1>
+          <p className="text-sm text-muted-foreground">
+            Hojas de ruta y tickets por establecimiento.
+          </p>
+        </div>
+        <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
       </div>
 
       <TicketFilters
@@ -84,9 +89,11 @@ export function TicketsPage() {
       />
 
       {ticketsQuery.isPending && (
-        <div className="space-y-3">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
         </div>
       )}
 
@@ -183,6 +190,7 @@ export function TicketsPage() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
       />
+      <NewTicketDialog open={newTicketOpen} onOpenChange={setNewTicketOpen} />
     </section>
   );
 }

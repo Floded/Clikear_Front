@@ -6,9 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StockTab } from "@/features/inventory/stock-tab";
 import { CustodyTab } from "@/features/inventory/custody-tab";
 import { AssignMaterialDialog } from "@/features/inventory/assign-material-dialog";
+import { NewInventoryItemDialog } from "@/features/inventory/new-inventory-item-dialog";
 
 export function InventoryPage() {
   const [assignOpen, setAssignOpen] = useState(false);
+  const [newInventoryOpen, setNewInventoryOpen] = useState(false);
 
   return (
     <section className="mx-auto max-w-6xl space-y-6">
@@ -19,7 +21,12 @@ export function InventoryPage() {
             Stock en depósito y custodia por empleado.
           </p>
         </div>
-        <Button onClick={() => setAssignOpen(true)}>Asignar material</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setNewInventoryOpen(true)}>
+            Nuevo ítem
+          </Button>
+          <Button onClick={() => setAssignOpen(true)}>Asignar material</Button>
+        </div>
       </div>
 
       <Tabs defaultValue="stock" className="space-y-4">
@@ -36,6 +43,7 @@ export function InventoryPage() {
       </Tabs>
 
       <AssignMaterialDialog open={assignOpen} onOpenChange={setAssignOpen} />
+      <NewInventoryItemDialog open={newInventoryOpen} onOpenChange={setNewInventoryOpen} />
     </section>
   );
 }

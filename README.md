@@ -55,7 +55,7 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 | 1 | Setup del proyecto + layout base | ✅ **Completada** |
 | 2 | Módulo de Tickets & Detalle | ✅ **Completada** |
 | 3 | Módulo de Inventario & Asignación | ✅ **Completada** |
-| 4 | Módulo ARCA & Polish final | ⬜ Opcional |
+| 4 | Módulo ARCA & Polish final | ✅ **Completada** |
 
 ### Etapa 1 ✅ — Setup & Layout Base
 
@@ -87,6 +87,19 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 - Devoluciones total/parcial (`PUT /api/assignments/:id/return`) con cantidad, fecha y notas; invalida stock, custodia y asignaciones.
 - Formularios con React Hook Form + Zod (`zodResolver`).
 - Endpoints conectados: `/inventory-items`, `/suppliers`, `/employees`, `/employees/:id/assignments`, `/assignments`.
+
+### Etapa 4 ✅ — Módulo ARCA & Polish final
+
+- Vista de **Facturación** con tabla de comprobantes, badges de estado (`PENDING`/`APPROVED`/`REJECTED`), filtro por estado y modal "Generar factura" (UI lista; emisión real pendiente del backend ARCA).
+- Skeleton loaders en listados de tickets, stock, custodia y facturación.
+- Toasts (Sonner) para altas/ajustes/devoluciones y errores de API.
+- Estados vacíos y manejo de errores inline en cada módulo.
+- (Opcional) pendiente: endpoints reales de ARCA en el backend para conectar la vista.
+
+### Extras (post-Etapa 4)
+
+- Botón **"Nuevo ticket"** en `/tickets` con formulario (ticketId BigInt, CUE, título, estado, GLPI, fecha de apertura) → `POST /api/tickets`.
+- Botón **"Nuevo ítem"** en `/inventory` con formulario (nombre, descripción, proveedor, cantidad inicial) → `POST /api/inventory-items`.
 
 ## 5. Quickstart
 

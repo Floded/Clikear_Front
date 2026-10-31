@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -31,7 +30,6 @@ interface TicketDetailDialogProps {
 
 export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetailDialogProps) {
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState<string>("");
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["ticket", ticketId],
@@ -39,16 +37,11 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
     enabled: open && ticketId !== null,
   });
 
-  // Sincroniza el estado seleccionado con el ticket cargado
-  if (data && status !== data.status && status === "") {
-    setStatus(data.status);
-  }
-
   const mutation = useMutation({
     mutationFn: (next: string) => updateTicketStatus(ticketId as string, next),
-    onSuccess: (updated) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tickets"] });
-      queryClient.setQueryData(["ticket", ticketId], updated);
+      queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
       toast.success("Estado actualizado");
     },
     onError: () => toast.error("No se pudo actualizar el estado"),
@@ -124,11 +117,8 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold">Cambiar estado</h3>
                 <Select
-                  value={status || data.status}
-                  onValueChange={(v) => {
-                    setStatus(v);
-                    mutation.mutate(v);
-                  }}
+                  value={data.status}
+                  onValueChange={(v) => mutation.mutate(v)}
                   disabled={mutation.isPending}
                 >
                   <SelectTrigger className="w-44">
@@ -145,7 +135,7 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
               </div>
             </section>
 
-            {data.invoices.length > 0 && (
+            {(data.invoices?.length ?? 0) > 0 && (
               <section className="space-y-2">
                 <h3 className="text-sm font-semibold">Facturas asociadas</h3>
                 <div className="overflow-x-auto rounded-md border">

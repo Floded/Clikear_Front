@@ -18,7 +18,7 @@
 - [x] Construir formulario modal para **Asignar Material a Empleado**: picker de ítem, picker de empleado, cantidad, DatePicker obligatorio para `delivery_date`. → RHF + Zod, solo ítems con stock y empleados activos.
 - [x] Conectar endpoints de inventario (`GET /api/inventory`, `POST /api/assignments`). → `/inventory-items`, `/employees`, `/employees/:id/assignments`, `/assignments`, además ajuste de stock y devoluciones.
 
-### Fase 4: Módulo ARCA & Polish Final (opcional)
-- [ ] Crear vista de facturación con indicador visual del estado de CAE de ARCA (Badge de pendiente/aprobado).
-- [ ] Agregar estados de carga (`Skeleton Loaders`) en tablas y modales.
-- [ ] Manejo visual de errores en peticiones HTTP mediante Notificaciones / Toasts.
+### Fase 4 ✅ Módulo ARCA & Polish Final (opcional)
+- [x] Crear vista de facturación con indicador visual del estado de CAE de ARCA (Badge de pendiente/aprobado). → tabla + `InvoiceStatusBadge` + filtro.
+- [x] Agregar estados de carga (`Skeleton Loaders`) en tablas y modales. → tickets, stock, custodia, facturación.
+- [x] Manejo visual de errores en peticiones HTTP mediante Notificaciones / Toasts. → Sonner en mutaciones + estados de error inline.
