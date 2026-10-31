@@ -54,7 +54,7 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 |---|---|---|
 | 1 | Setup del proyecto + layout base | ✅ **Completada** |
 | 2 | Módulo de Tickets & Detalle | ✅ **Completada** |
-| 3 | Módulo de Inventario & Asignación | ⬜ Pendiente |
+| 3 | Módulo de Inventario & Asignación | ✅ **Completada** |
 | 4 | Módulo ARCA & Polish final | ⬜ Opcional |
 
 ### Etapa 1 ✅ — Setup & Layout Base
@@ -77,6 +77,16 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 - Filtros conectados a `GET /api/tickets` (status, establishment, technicianId, search, paginación).
 - Detalle desde `GET /api/tickets/:id` (incluye establishment → dispatchOrder → technicians + invoices).
 - `useDebouncedValue` compartido en `src/hooks/`.
+
+### Etapa 3 ✅ — Módulo de Inventario & Asignación
+
+- Pestaña **Stock en depósito**: tabla de ítems (nombre, descripción, proveedor, disponible, en custodia) con alerta visual de bajo stock (`<= 3`) y sin stock; filtros por búsqueda y disponibilidad; paginación.
+- Pestaña **Custodia por empleado**: listado de empleados con estado y unidades activas; modal de custodia con asignaciones activas y devolución total/parcial.
+- Modal **Asignar material**: ítem (solo con stock), empleado (solo activos), cantidad, fecha de entrega obligatoria, notas. Manejo del `409` de stock insuficiente con toast.
+- Ajuste diferencial de stock (`PATCH /api/inventory-items/:id/stock`) desde la tabla, con validación de entero distinto de cero y error de stock negativo.
+- Devoluciones total/parcial (`PUT /api/assignments/:id/return`) con cantidad, fecha y notas; invalida stock, custodia y asignaciones.
+- Formularios con React Hook Form + Zod (`zodResolver`).
+- Endpoints conectados: `/inventory-items`, `/suppliers`, `/employees`, `/employees/:id/assignments`, `/assignments`.
 
 ## 5. Quickstart
 
