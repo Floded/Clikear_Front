@@ -1,10 +1,10 @@
 ## Lista de Tareas para el Desarrollo del Frontend
 
-### Fase 1: Setup del Proyecto & Layout Base
-- [ ] Inicializar proyecto React/Next.js con Tailwind CSS y TypeScript.
-- [ ] Configurar cliente de API (Axios / TanStack Query).
-- [ ] Implementar `Sidebar` de navegación principal (Tickets, Stock, Facturación, Configuración).
-- [ ] Crear el layout responsivo base.
+### Fase 1 ✅ Setup del Proyecto & Layout Base
+- [x] Inicializar proyecto React/Next.js con Tailwind CSS y TypeScript. → Vite + React 19 + TS 7 (decisión: panel interno sin SSR, no Next).
+- [x] Configurar cliente de API (Axios / TanStack Query). → `src/lib/api.ts` con `VITE_API_URL`; indicador de health en el sidebar.
+- [x] Implementar `Sidebar` de navegación principal (Tickets, Stock, Facturación, Configuración). → Tickets / Inventario / Facturación; se agrega "Configuración" cuando haga falta.
+- [x] Crear el layout responsivo base. → `AppLayout` con `<Outlet/>` + rutas placeholder.
 
 ### Fase 2: Módulo de Tickets & Detalle
 - [ ] Crear componentes UI reutilizables: `Badge` (estados), `Table`, `Modal`, `InputSearch`.
