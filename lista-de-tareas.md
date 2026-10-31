@@ -6,11 +6,11 @@
 - [x] Implementar `Sidebar` de navegación principal (Tickets, Stock, Facturación, Configuración). → Tickets / Inventario / Facturación; se agrega "Configuración" cuando haga falta.
 - [x] Crear el layout responsivo base. → `AppLayout` con `<Outlet/>` + rutas placeholder.
 
-### Fase 2: Módulo de Tickets & Detalle
-- [ ] Crear componentes UI reutilizables: `Badge` (estados), `Table`, `Modal`, `InputSearch`.
-- [ ] Implementar la vista del listado de tickets agrupados por escuela / orden de despacho.
-- [ ] Desarrollar el modal de detalle extendido con la información del PDF (CUE, Dirección, Distancia, Técnicos, GLPI).
-- [ ] Conectar los endpoints de consulta (`GET /api/tickets`, `GET /api/tickets/:id`).
+### Fase 2 ✅ Módulo de Tickets & Detalle
+- [x] Crear componentes UI reutilizables: `Badge` (estados), `Table`, `Modal`, `InputSearch`. → `TicketStatusBadge`, shadcn `Table`/`Dialog`, `TicketFilters`.
+- [x] Implementar la vista del listado de tickets agrupados por escuela / orden de despacho. → agrupado por CUE (establecimiento), tabla por grupo.
+- [x] Desarrollar el modal de detalle extendido con la información del PDF (CUE, Dirección, Distancia, Técnicos, GLPI). → incluye además departamento, localidad, teléfono, director/a, orden de despacho y facturas.
+- [x] Conectar los endpoints de consulta (`GET /api/tickets`, `GET /api/tickets/:id`). → + `PATCH /api/tickets/:id/status` para cambio de estado.
 
 ### Fase 3: Módulo de Inventario & Asignación
 - [ ] Implementar vista de tabla de stock en depósito con alerta visual de bajo stock.

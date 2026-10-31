@@ -53,7 +53,7 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 | Etapa | Alcance | Estado |
 |---|---|---|
 | 1 | Setup del proyecto + layout base | ✅ **Completada** |
-| 2 | Módulo de Tickets & Detalle | ⬜ Pendiente |
+| 2 | Módulo de Tickets & Detalle | ✅ **Completada** |
 | 3 | Módulo de Inventario & Asignación | ⬜ Pendiente |
 | 4 | Módulo ARCA & Polish final | ⬜ Opcional |
 
@@ -65,6 +65,18 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 - Indicador de **health del backend** en el footer del sidebar (`GET /api/health`, auto-refresh cada 30s).
 - Cliente API en `src/lib/api.ts` con `baseURL` configurable vía `VITE_API_URL` (`.env` / `.env.example`).
 - Rutas: `/` → redirect `/tickets`; páginas placeholder de cada módulo con su estado de etapa.
+
+### Etapa 2 ✅ — Módulo de Tickets & Detalle
+
+- Componentes reutilizables: `TicketStatusBadge`, `TicketFilters` (búsqueda con debounce + CUE + estado + técnico), `TicketDetailDialog`.
+- Listado agrupado por establecimiento (CUE) con tabla de tickets (número, título, estado, apertura) y paginación.
+- Modal de detalle extendido: CUE, nombre, departamento, localidad, dirección, teléfono, distancia en km, director/a, GLPI, fecha de apertura.
+- Orden de despacho asociada con código, fecha, estado y técnicos asignados (chips).
+- Facturas asociadas (voucher, monto, estado, CAE).
+- Cambio de estado desde el modal (`PATCH /api/tickets/:id/status`) con mutación + toast y refresco del listado.
+- Filtros conectados a `GET /api/tickets` (status, establishment, technicianId, search, paginación).
+- Detalle desde `GET /api/tickets/:id` (incluye establishment → dispatchOrder → technicians + invoices).
+- `useDebouncedValue` compartido en `src/hooks/`.
 
 ## 5. Quickstart
 
