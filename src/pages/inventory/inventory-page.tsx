@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +15,7 @@ export function InventoryPage() {
   const [newInventoryOpen, setNewInventoryOpen] = useState(false);
 
   return (
-    <section className="mx-auto max-w-6xl space-y-6">
+    <section className="mx-auto max-w-6ls space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">Inventario</h1>
@@ -22,6 +24,12 @@ export function InventoryPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/inventory/suppliers">
+              <Truck className="size-4" aria-hidden />
+              Proveedores
+            </Link>
+          </Button>
           <Button variant="outline" onClick={() => setNewInventoryOpen(true)}>
             Nuevo ítem
           </Button>

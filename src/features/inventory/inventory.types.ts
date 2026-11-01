@@ -3,6 +3,8 @@ export interface Supplier {
   name: string;
   contactPhone: string | null;
   contactEmail: string | null;
+  website: string | null;
+  _count?: { inventoryItems: number };
 }
 
 export interface InventoryItem {

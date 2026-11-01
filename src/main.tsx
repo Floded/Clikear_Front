@@ -7,6 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Toaster } from '@/components/ui/sonner'
 import { InvoicesPage } from './pages/invoices/invoices-page'
 import { InventoryPage } from './pages/inventory/inventory-page'
+import { SuppliersPage } from './pages/inventory/suppliers-page'
 import { TicketsPage } from './pages/tickets/tickets-page'
 import './index.css'
 
@@ -28,6 +29,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/" element={<Navigate to="/tickets" replace />} />
             <Route path="/tickets" element={<TicketsPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/inventory/suppliers" element={<SuppliersPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />
             <Route
               path="*"

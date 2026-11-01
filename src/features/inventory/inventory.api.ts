@@ -52,6 +52,21 @@ export async function fetchSuppliers(query: { search?: string; page?: number; li
   return data;
 }
 
+export async function fetchSupplier(id: number): Promise<Supplier> {
+  const { data } = await api.get<Supplier>(`/suppliers/${id}`);
+  return data;
+}
+
+export async function createSupplier(input: {
+  name: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  website?: string;
+}): Promise<Supplier> {
+  const { data } = await api.post<Supplier>("/suppliers", input);
+  return data;
+}
+
 export async function fetchEmployees(query: {
   search?: string;
   isActive?: string;
@@ -94,5 +109,15 @@ export async function returnAssignment(
 
 export async function fetchCustody(employeeId: number): Promise<CustodyResponse> {
   const { data } = await api.get<CustodyResponse>(`/employees/${employeeId}/assignments`);
+  return data;
+}
+
+export async function createEmployee(input: {
+  fullName: string;
+  dniOrFileNumber: string;
+  phone?: string;
+  isActive?: boolean;
+}): Promise<Employee> {
+  const { data } = await api.post<Employee>("/employees", input);
   return data;
 }

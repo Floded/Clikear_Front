@@ -31,10 +31,16 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 
 ### 2. Panel de Control de Inventario y Custodia (`/inventory`)
 * **Tablas Conmutables (Tabs):**
-  * **Pestaña 1: Stock en Depósito (`/inventory/stock`):** Muestra el listado de ítems, cantidad disponible y proveedor asignado.
+  * **Pestaña 1: Stock en Depósito (`/inventory/stock`):** Muestra el listado de ítems, cantidad disponible y proveedor asignado. Al posarse sobre el proveedor se abre una **hover card** con teléfono, email y página web del proveedor.
   * **Pestaña 2: Custodia por Empleado (`/inventory/assignments`):** Muestra qué herramientas/materiales tiene asignado cada empleado, la cantidad y la **fecha obligatoria de entrega**.
 * **Modal de Registro / Asignación de Material:** 
   * Formulario para seleccionar ítem, empleado, cantidad a entregar y selector de fecha (`delivery_date`).
+* **Botón "Proveedores"** → navega al módulo de proveedores.
+
+### 2b. Proveedores (`/inventory/suppliers`)
+* **Listado paginado** con búsqueda por nombre o email: teléfono, email, página web (links `tel:`, `mailto:` y web en pestaña nueva) y cantidad de ítems asociados.
+* **Botón "Nuevo proveedor"**: formulario con nombre obligatorio y datos de contacto opcionales (validación de email y URL).
+* Link "Volver al inventario".
 
 ### 3. Módulo de Facturación ARCA (`/invoices`)
 * **Listado de Facturas / Comprobantes:** Visualización del estado del trámite en ARCA (`PENDING`, `APPROVED`, `REJECTED`).
@@ -100,8 +106,17 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 
 - Botón **"Nuevo ticket"** en `/tickets` con formulario (ticketId BigInt, CUE, título, estado, GLPI, fecha de apertura) → `POST /api/tickets`.
 - Botón **"Nuevo ítem"** en `/inventory` con formulario (nombre, descripción, proveedor, cantidad inicial) → `POST /api/inventory-items`.
+- **Módulo de Proveedores** (`/inventory/suppliers`): botón "Proveedores" en el header de Inventario, listado con búsqueda/paginación y alta (`POST /api/suppliers`) incluyendo el campo `website`.
+- **Hover card de proveedor** en el tab de stock (`supplier-cell.tsx`): al posarse sobre el nombre se consulta `GET /api/suppliers/:id` y se muestra un card flotante (portal + posición calculada, sin modal) con teléfono, email y página web.
 
-## 5. Quickstart
+## 5. Pendientes conocidos
+
+- **ARCA / Facturación**: la emisión real de comprobantes sigue pendiente del backend (Fase 5: cola BullMQ + WSAA/WSFE); la vista y el modal "Generar factura" están listos pero no emiten.
+- **Empleados**: existe `new-employee-dialog.tsx` sin usar y con errores de TypeScript (`useQuery`/`employeesQuery` sin uso); falta decidir si se conecta el alta de empleados o se elimina.
+- **Proveedores**: falta edición y baja de proveedores (el backend ya expone `PATCH`/`DELETE /api/suppliers/:id`; el frontend solo tiene alta y listado).
+- **Tickets**: no hay edición de tickets existentes (solo alta y cambio de estado).
+
+## 6. Quickstart
 
 ```bash
 npm install

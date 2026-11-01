@@ -28,6 +28,7 @@ import {
   fetchInventoryItems,
 } from "@/features/inventory/inventory.api";
 import type { InventoryItem } from "@/features/inventory/inventory.types";
+import { SupplierCell } from "@/features/inventory/supplier-cell";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const LOW_STOCK_THRESHOLD = 3;
@@ -165,7 +166,7 @@ export function StockTab() {
                     )}
                   </td>
                   <td className="px-4 py-2 text-xs">
-                    {item.supplier?.name ?? "—"}
+                    <SupplierCell supplier={item.supplier} />
                   </td>
                   <td className="px-4 py-2">{stockBadge(item)}</td>
                   <td className="px-4 py-2 text-xs">{item._count?.assignments ?? 0}</td>
