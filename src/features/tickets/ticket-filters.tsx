@@ -18,16 +18,23 @@ export interface TicketFiltersState {
   status: string;
   technicianId: string;
   establishment: string;
+  employeeId: string;
   search: string;
+}
+
+interface EmployeeOption {
+  id: number;
+  fullName: string;
 }
 
 interface TicketFiltersProps {
   value: TicketFiltersState;
   onChange: (next: TicketFiltersState) => void;
   technicians: Technician[];
+  employees: EmployeeOption[];
 }
 
-export function TicketFilters({ value, onChange, technicians }: TicketFiltersProps) {
+export function TicketFilters({ value, onChange, technicians, employees }: TicketFiltersProps) {
   const [search, setSearch] = useState(value.search);
   const debouncedSearch = useDebouncedValue(search, 350);
 
@@ -40,7 +47,7 @@ export function TicketFilters({ value, onChange, technicians }: TicketFiltersPro
   }, [debouncedSearch]);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <div className="space-y-1.5">
         <Label htmlFor="search">Buscar título</Label>
         <Input
@@ -98,6 +105,29 @@ export function TicketFilters({ value, onChange, technicians }: TicketFiltersPro
             {technicians.map((t) => (
               <SelectItem key={t.id} value={String(t.id)}>
                 {t.fullName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Empleado asignado</Label>
+        <Select
+          value={value.employeeId || "ALL"}
+          onValueChange={(v) =>
+            onChange({ ...value, employeeId: v === "ALL" ? "" : v })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todos</SelectItem>
+            <SelectItem value="none">Sin asignar</SelectItem>
+            {employees.map((e) => (
+              <SelectItem key={e.id} value={String(e.id)}>
+                {e.fullName}
               </SelectItem>
             ))}
           </SelectContent>

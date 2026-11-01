@@ -16,9 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchTicketDetail, updateTicketStatus } from "@/features/tickets/tickets.api";
+import { fetchEmployees } from "@/features/inventory/inventory.api";
+import {
+  assignTicket,
+  fetchTicketDetail,
+  updateTicketStatus,
+} from "@/features/tickets/tickets.api";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
 import { TICKET_STATUSES } from "@/features/tickets/tickets.types";
 
@@ -37,6 +43,13 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
     enabled: open && ticketId !== null,
   });
 
+  const employeesQuery = useQuery({
+    queryKey: ["employees", "all"],
+    queryFn: () => fetchEmployees({ isActive: "true", limit: 100 }),
+    enabled: open,
+    staleTime: 60_000,
+  });
+
   const mutation = useMutation({
     mutationFn: (next: string) => updateTicketStatus(ticketId as string, next),
     onSuccess: () => {
@@ -45,6 +58,26 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
       toast.success("Estado actualizado");
     },
     onError: () => toast.error("No se pudo actualizar el estado"),
+  });
+
+  const assignmentMutation = useMutation({
+    mutationFn: (nextEmployeeId: number | null) =>
+      assignTicket(ticketId as string, nextEmployeeId),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+      toast.success(
+        result.assignedEmployee
+          ? `Asignado a ${result.assignedEmployee.fullName}`
+          : "Ticket liberado",
+      );
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        "No se pudo actualizar la asignación";
+      toast.error(msg);
+    },
   });
 
   return (
@@ -133,6 +166,82 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
                   </SelectContent>
                 </Select>
               </div>
+            </section>
+
+            {/* Asignación a empleado (seguimiento) */}
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold">Asignación</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {data.assignedEmployee
+                      ? `Responsable: ${data.assignedEmployee.fullName}`
+                      : "Sin asignar"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={data.assignedEmployee ? String(data.assignedEmployee.id) : "none"}
+                    onValueChange={(v) =>
+                      assignmentMutation.mutate(v === "none" ? null : Number(v))
+                    }
+                    disabled={assignmentMutation.isPending}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Asignar a…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin asignar</SelectItem>
+                      {(employeesQuery.data?.data ?? []).map((e) => (
+                        <SelectItem key={e.id} value={String(e.id)}>
+                          {e.fullName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {data.assignedEmployee && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={assignmentMutation.isPending}
+                      onClick={() => assignmentMutation.mutate(null)}
+                    >
+                      Liberar
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {(data.assignments?.length ?? 0) > 0 && (
+                <div className="overflow-x-auto rounded-md border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 text-left">
+                      <tr>
+                        <th className="p-2">Empleado</th>
+                        <th className="p-2">Asignado</th>
+                        <th className="p-2">Liberado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.assignments.map((a) => (
+                        <tr key={a.id} className="border-t">
+                          <td className="p-2">{a.employee.fullName}</td>
+                          <td className="p-2 text-xs">
+                            {new Date(a.assignedAt).toLocaleString()}
+                          </td>
+                          <td className="p-2 text-xs">
+                            {a.releasedAt ? (
+                              new Date(a.releasedAt).toLocaleString()
+                            ) : (
+                              <Badge variant="secondary">Actual</Badge>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
 
             {(data.invoices?.length ?? 0) > 0 && (

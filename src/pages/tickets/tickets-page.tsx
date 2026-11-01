@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { fetchEmployees } from "@/features/inventory/inventory.api";
 import { fetchTickets, fetchTechnicians } from "@/features/tickets/tickets.api";
 import { TicketFilters, type TicketFiltersState } from "@/features/tickets/ticket-filters";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
@@ -16,6 +17,7 @@ const EMPTY_FILTERS: TicketFiltersState = {
   status: "",
   technicianId: "",
   establishment: "",
+  employeeId: "",
   search: "",
 };
 
@@ -31,6 +33,12 @@ export function TicketsPage() {
       status: filters.status || undefined,
       establishment: filters.establishment || undefined,
       technicianId: filters.technicianId ? Number(filters.technicianId) : undefined,
+      // "none" = sin asignar, número = tickets de ese empleado
+      employeeId: filters.employeeId
+        ? filters.employeeId === "none"
+          ? ("none" as const)
+          : Number(filters.employeeId)
+        : undefined,
       search: filters.search || undefined,
       page,
       limit: 20,
@@ -47,6 +55,12 @@ export function TicketsPage() {
   const techniciansQuery = useQuery({
     queryKey: ["technicians", "all"],
     queryFn: fetchTechnicians,
+    staleTime: 60_000,
+  });
+
+  const employeesQuery = useQuery({
+    queryKey: ["employees", "all"],
+    queryFn: () => fetchEmployees({ isActive: "true", limit: 100 }),
     staleTime: 60_000,
   });
 
@@ -86,6 +100,7 @@ export function TicketsPage() {
           setPage(1);
         }}
         technicians={techniciansQuery.data?.data ?? []}
+        employees={employeesQuery.data?.data ?? []}
       />
 
       {ticketsQuery.isPending && (
@@ -129,6 +144,7 @@ export function TicketsPage() {
                     <th className="px-4 py-2 font-medium"># Ticket</th>
                     <th className="px-4 py-2 font-medium">Título</th>
                     <th className="px-4 py-2 font-medium">Estado</th>
+                    <th className="px-4 py-2 font-medium">Asignado a</th>
                     <th className="px-4 py-2 font-medium">Apertura</th>
                   </tr>
                 </thead>
@@ -143,6 +159,11 @@ export function TicketsPage() {
                       <td className="px-4 py-2">{ticket.title}</td>
                       <td className="px-4 py-2">
                         <TicketStatusBadge status={ticket.status} />
+                      </td>
+                      <td className="px-4 py-2 text-xs">
+                        {ticket.assignedEmployee?.fullName ?? (
+                          <span className="text-muted-foreground">Sin asignar</span>
+                        )}
                       </td>
                       <td className="px-4 py-2 text-xs text-muted-foreground">
                         {ticket.openingTimestamp

@@ -14,12 +14,29 @@ export interface EstablishmentSummary {
   isSecondaryBuilding: boolean;
 }
 
+// Info que el formulario de ticket puede aportar para crear/completar el establecimiento
+export interface EstablishmentInput {
+  name: string;
+  department?: string;
+  locality?: string;
+  address?: string;
+  phone?: string;
+  directorName?: string;
+}
+
+export interface EmployeeSummary {
+  id: number;
+  fullName: string;
+  isActive: boolean;
+}
+
 export interface TicketListItem {
   ticketId: string;
   title: string;
   status: string;
   glpiClosedTicket: string | null;
   openingTimestamp: string | null;
+  assignedEmployee: EmployeeSummary | null;
   establishment: EstablishmentSummary | null;
 }
 
@@ -55,14 +72,26 @@ export interface InvoiceItem {
   createdAt: string;
 }
 
+export interface TicketAssignment {
+  id: number;
+  ticketId: string;
+  employeeId: number;
+  assignedAt: string;
+  releasedAt: string | null;
+  employee: { id: number; fullName: string };
+}
+
 export interface TicketDetail {
   ticketId: string;
   establishmentCue: string | null;
+  assignedEmployeeId: number | null;
   title: string;
   glpiClosedTicket: string | null;
   openingTimestamp: string | null;
   status: string;
+  assignedEmployee: EmployeeSummary | null;
   establishment: EstablishmentDetail | null;
+  assignments: TicketAssignment[];
   invoices: InvoiceItem[];
 }
 
