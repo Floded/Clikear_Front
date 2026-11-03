@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchEmployees } from "@/features/inventory/inventory.api";
+import { fetchEmployees } from "@/features/organization/organization.api";
 import {
   assignTicket,
   fetchTicketDetail,

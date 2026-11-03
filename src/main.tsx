@@ -10,6 +10,7 @@ import { InventoryPage } from './pages/inventory/inventory-page'
 import { SuppliersPage } from './pages/inventory/suppliers-page'
 import { TicketsPage } from './pages/tickets/tickets-page'
 import { BudgetsPage } from './pages/budgets/budgets-page'
+import { OrganizationPage } from './pages/organization/organization-page'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<AppLayout />}>
             <Route path="/" element={<Navigate to="/tickets" replace />} />
             <Route path="/tickets" element={<TicketsPage />} />
+            <Route path="/organization" element={<OrganizationPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/inventory/suppliers" element={<SuppliersPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />

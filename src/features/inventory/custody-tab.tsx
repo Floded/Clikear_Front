@@ -25,8 +25,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-import { fetchEmployees, fetchCustody, returnAssignment } from "@/features/inventory/inventory.api";
-import type { Employee, Assignment } from "@/features/inventory/inventory.types";
+import { fetchCustody, returnAssignment } from "@/features/inventory/inventory.api";
+import type { Assignment } from "@/features/inventory/inventory.types";
+import { fetchEmployees } from "@/features/organization/organization.api";
+import type { Employee } from "@/features/organization/organization.types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 export function CustodyTab() {

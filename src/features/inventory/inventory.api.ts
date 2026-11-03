@@ -3,7 +3,6 @@ import { api } from "@/lib/api";
 import type {
   Assignment,
   CustodyResponse,
-  Employee,
   InventoryItem,
   Paginated,
   Supplier,
@@ -67,16 +66,6 @@ export async function createSupplier(input: {
   return data;
 }
 
-export async function fetchEmployees(query: {
-  search?: string;
-  isActive?: string;
-  page?: number;
-  limit?: number;
-} = {}): Promise<Paginated<Employee>> {
-  const { data } = await api.get<Paginated<Employee>>("/employees", { params: query });
-  return data;
-}
-
 export async function fetchAssignments(query: {
   employeeId?: number;
   inventoryItemId?: number;
@@ -109,15 +98,5 @@ export async function returnAssignment(
 
 export async function fetchCustody(employeeId: number): Promise<CustodyResponse> {
   const { data } = await api.get<CustodyResponse>(`/employees/${employeeId}/assignments`);
-  return data;
-}
-
-export async function createEmployee(input: {
-  fullName: string;
-  dniOrFileNumber: string;
-  phone?: string;
-  isActive?: boolean;
-}): Promise<Employee> {
-  const { data } = await api.post<Employee>("/employees", input);
   return data;
 }

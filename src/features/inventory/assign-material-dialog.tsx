@@ -24,7 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { createAssignment, fetchInventoryItems, fetchEmployees } from "@/features/inventory/inventory.api";
+import { createAssignment, fetchInventoryItems } from "@/features/inventory/inventory.api";
+import { fetchEmployees } from "@/features/organization/organization.api";
 
 const schema = z.object({
   inventoryItemId: z.coerce.number().int().positive({ message: "Seleccioná un ítem" }),

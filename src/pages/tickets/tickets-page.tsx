@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchEmployees } from "@/features/inventory/inventory.api";
+import { fetchEmployees } from "@/features/organization/organization.api";
 import { fetchTickets, fetchTechnicians } from "@/features/tickets/tickets.api";
 import { TicketFilters, type TicketFiltersState } from "@/features/tickets/ticket-filters";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";

@@ -1,6 +1,6 @@
 export interface BudgetLine {
   id?: number;
-  inventoryItemId?: number;
+  inventoryItemId?: number | null;
   description: string;
   quantity: number;
   unitPrice: number;
@@ -22,22 +22,22 @@ export interface Budget {
   lines: BudgetLine[];
 }
 
-export interface CreateBudgetInput {
+export interface BudgetLineInput {
+  id?: number;
+  inventoryItemId?: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface BudgetInput {
   customerName: string;
   establishmentCue?: string;
   validUntil?: string;
   notes?: string;
-  lines: Array<{
-    inventoryItemId?: number;
-    description: string;
-    quantity: number;
-    unitPrice: number;
-  }>;
+  lines: BudgetLineInput[];
 }
 
 export interface ListBudgetsQuery {
-  search?: string;
-  status?: "DRAFT" | "SENT" | "APPROVED" | "REJECTED";
-  page?: number;
-  limit?: number;
+  establishmentCue?: string;
 }

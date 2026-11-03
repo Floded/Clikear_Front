@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Boxes, Calculator, ClipboardList, ReceiptText, Wrench } from "lucide-react";
+import { Boxes, Calculator, ClipboardList, ReceiptText, Users, Wrench } from "lucide-react";
 
 import { cn } from "cn";
 import { HealthStatus } from "./health-status";
 
 const navigationOptions = [
   { to: "/tickets", label: "Tickets", icon: ClipboardList },
+  { to: "/organization", label: "Organización", icon: Users },
   { to: "/inventory", label: "Inventario", icon: Boxes },
   { to: "/budgets", label: "Presupuestos", icon: Calculator },
   { to: "/invoices", label: "Facturación", icon: ReceiptText },

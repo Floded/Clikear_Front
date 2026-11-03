@@ -19,15 +19,6 @@ export interface InventoryItem {
   _count?: { assignments: number };
 }
 
-export interface Employee {
-  id: number;
-  fullName: string;
-  dniOrFileNumber: string;
-  phone: string | null;
-  isActive: boolean;
-  _count?: { assignments: number };
-}
-
 export interface Assignment {
   id: number;
   inventoryItemId: number;
