@@ -1,7 +1,11 @@
-import { NavLink } from "react-router-dom";
-import { Boxes, Calculator, ClipboardList, ReceiptText, Users, Wrench } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Boxes, Calculator, ClipboardList, LogOut, ReceiptText, Users, Wrench } from "lucide-react";
 
 import { cn } from "cn";
+import { logout } from "@/features/auth/auth.api";
+import { sessionQueryKey, useSession } from "@/features/auth/use-session";
+import { Button } from "@/components/ui/button";
 import { HealthStatus } from "./health-status";
 
 const navigationOptions = [
@@ -13,6 +17,18 @@ const navigationOptions = [
 ];
 
 export function Sidebar() {
+  const { data: user } = useSession();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSettled: () => {
+      queryClient.setQueryData(sessionQueryKey, null);
+      navigate("/login", { replace: true });
+    },
+  });
+
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
       <div className="flex items-center gap-2 border-b px-5 py-4">
@@ -40,8 +56,25 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t p-3">
+      <div className="flex flex-col gap-3 border-t p-3">
         <HealthStatus />
+
+        <div className="flex items-center gap-2 px-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{user?.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+            disabled={logoutMutation.isPending}
+            onClick={() => logoutMutation.mutate()}
+          >
+            <LogOut className="size-4" aria-hidden />
+          </Button>
+        </div>
       </div>
     </aside>
   );
