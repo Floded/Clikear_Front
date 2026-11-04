@@ -152,20 +152,20 @@ export function TicketsPage() {
                   {group.items.map((ticket) => (
                     <tr
                       key={ticket.ticketId}
-                      className="cursor-pointer border-b last:border-0 hover:bg-muted/30"
+                      className="cursor-pointer border-b last:border-0 hover:bg-muted/30 min-h-[36px] whitespace-nowrap"
                       onClick={() => openDetail(ticket.ticketId)}
                     >
-                      <td className="px-4 py-2 font-mono text-xs">{ticket.ticketId}</td>
-                      <td className="px-4 py-2">{ticket.title}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-2 font-mono text-xs text-right whitespace-nowrap">{ticket.ticketId}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{ticket.title}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">
                         <TicketStatusBadge status={ticket.status} />
                       </td>
-                      <td className="px-4 py-2 text-xs">
+                      <td className="px-4 py-2 text-xs whitespace-nowrap">
                         {ticket.assignedEmployee?.fullName ?? (
                           <span className="text-muted-foreground">Sin asignar</span>
                         )}
                       </td>
-                      <td className="px-4 py-2 text-xs text-muted-foreground">
+                      <td className="px-4 py-2 text-xs text-right text-muted-foreground whitespace-nowrap">
                         {ticket.openingTimestamp
                           ? new Date(ticket.openingTimestamp).toLocaleDateString()
                           : "—"}
