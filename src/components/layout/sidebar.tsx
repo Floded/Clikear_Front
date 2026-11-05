@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Boxes, Calculator, ClipboardList, LogOut, ReceiptText, Users, Wrench } from "lucide-react";
+import { Boxes, Calculator, ClipboardList, LogOut, ReceiptText, Users } from "lucide-react";
 
 import { cn } from "cn";
+import logoUrl from "@/assets/logo.png";
 import { logout } from "@/features/auth/auth.api";
 import { sessionQueryKey, useSession } from "@/features/auth/use-session";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export function Sidebar() {
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
       <div className="flex items-center gap-2 border-b px-5 py-4">
-        <Wrench className="size-5" aria-hidden />
+        <img src={logoUrl} alt="" className="size-6 rounded-md object-cover" aria-hidden />
         <span className="font-semibold tracking-tight">Clickear</span>
       </div>
 
