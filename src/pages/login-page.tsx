@@ -4,8 +4,9 @@ import { z } from "zod";
 import type { Resolver } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Wrench } from "lucide-react";
 import { toast } from "sonner";
+
+import logoUrl from "@/assets/logo.png";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,9 +63,11 @@ export function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center pb-2">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Wrench className="size-5" aria-hidden />
-            </div>
+            <img
+              src={logoUrl}
+              alt="Logo de Clickear"
+              className="size-12 rounded-lg object-cover"
+            />
           </div>
           <CardTitle className="text-xl">Iniciar sesión</CardTitle>
           <CardDescription>Accedé a Clickear con tu cuenta</CardDescription>
