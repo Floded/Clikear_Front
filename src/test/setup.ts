@@ -10,3 +10,11 @@ Element.prototype.setPointerCapture ??= () => {};
 Element.prototype.releasePointerCapture ??= () => {};
 Element.prototype.scrollIntoView ??= () => {};
 window.scrollTo = () => {};
+
+window.matchMedia =
+  window.matchMedia ||
+  (() => ({
+    matches: false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
