@@ -3,7 +3,7 @@ import { Cloud, CloudOff, RefreshCw } from "lucide-react";
 
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { runSync } from "@/lib/sync";
 import { getDesktopInfo, isDesktop, setDesktopMode, type AppMode } from "@/lib/desktop";
 import { invalidateDesktopInfo } from "@/lib/api";
 import { toast } from "sonner";
@@ -33,13 +33,13 @@ export function ModeToggle() {
   });
 
   const syncMutation = useMutation({
-    mutationFn: async () => (await api.get("/sync/pull", { params: { since: new Date(0).toISOString() } })).data,
-    onSuccess: (data) => {
-      const count = Object.values(data?.data ?? {}).reduce(
-        (acc: number, rows: unknown) => acc + (Array.isArray(rows) ? rows.length : 0),
-        0,
-      );
-      toast.success(`Sincronización OK (${count} registros)`);
+    mutationFn: runSync,
+    onSuccess: (result) => {
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`Sync OK: ${result.pushed} enviados, ${result.pulled} recibidos`);
     },
     onError: () => toast.error("Error al sincronizar"),
   });

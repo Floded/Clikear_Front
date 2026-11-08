@@ -6,7 +6,6 @@ import { ThemeProvider } from 'next-themes'
 
 import { AppLayout } from '@/components/layout/app-layout'
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { Toaster } from '@/components/ui/sonner'
 import { InvoicesPage } from './pages/invoices/invoices-page'
 import { InventoryPage } from './pages/inventory/inventory-page'
 import { SuppliersPage } from './pages/inventory/suppliers-page'
@@ -27,7 +26,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider strategy="class">
+    <ThemeProvider attribute="class">
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
