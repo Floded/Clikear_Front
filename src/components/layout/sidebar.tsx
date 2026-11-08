@@ -9,6 +9,7 @@ import { sessionQueryKey, useSession } from "@/features/auth/use-session";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { HealthStatus } from "./health-status";
+import { ModeToggle } from "./mode-toggle";
 import { Moon, Sun } from "lucide-react";
 
 const navigationOptions = [
@@ -85,6 +86,8 @@ export function Sidebar() {
         </div>
 
         <HealthStatus />
+
+        <ModeToggle />
 
         <div className="flex items-center gap-2 px-3">
           <div className="min-w-0 flex-1">
