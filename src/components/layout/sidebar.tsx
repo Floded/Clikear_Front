@@ -7,7 +7,10 @@ import logoUrl from "@/assets/logo.png";
 import { logout } from "@/features/auth/auth.api";
 import { sessionQueryKey, useSession } from "@/features/auth/use-session";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 import { HealthStatus } from "./health-status";
+import { ModeToggle } from "./mode-toggle";
+import { Moon, Sun } from "lucide-react";
 
 const navigationOptions = [
   { to: "/tickets", label: "Tickets", icon: ClipboardList },
@@ -21,6 +24,17 @@ export function Sidebar() {
   const { data: user } = useSession();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+  // Alterna el tema y asegura que la clase .dark esté en el HTML para Tailwind
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+    const html = document.documentElement;
+    if (theme === "dark") {
+      html.classList.add("dark");
+    } else {
+      html.classList.remove("dark");
+    }
+  };
 
   const logoutMutation = useMutation({
     mutationFn: logout,
@@ -58,7 +72,22 @@ export function Sidebar() {
       </nav>
 
       <div className="flex flex-col gap-3 border-t p-3">
+        {/* Theme toggle button */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Alternar modo oscuro/claro"
+            onClick={toggleTheme}
+          >
+            <Moon className="size-4 block dark:hidden" aria-hidden />
+            <Sun className="size-4 hidden dark:block" aria-hidden />
+          </Button>
+        </div>
+
         <HealthStatus />
+
+        <ModeToggle />
 
         <div className="flex items-center gap-2 px-3">
           <div className="min-w-0 flex-1">

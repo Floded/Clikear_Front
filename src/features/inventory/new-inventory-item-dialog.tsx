@@ -21,10 +21,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createInventoryItem, fetchSuppliers } from "@/features/inventory/inventory.api";
 import type { InventoryItem } from "@/features/inventory/inventory.types";
 
+// supplierId: 0 significa "sin proveedor"; se envía como undefined más abajo
 const createInventoryItemSchema = z.object({
   name: z.string().trim().min(1, { message: "El nombre es obligatorio" }),
   description: z.string().trim().max(2000).optional(),
-  supplierId: z.coerce.number().int().positive().optional(),
+  supplierId: z.coerce.number().int().min(0).optional(),
   availableQuantity: z.coerce.number().int().min(0).default(0),
 });
 

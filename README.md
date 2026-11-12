@@ -109,14 +109,33 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 - **Módulo de Proveedores** (`/inventory/suppliers`): botón "Proveedores" en el header de Inventario, listado con búsqueda/paginación y alta (`POST /api/suppliers`) incluyendo el campo `website`.
 - **Hover card de proveedor** en el tab de stock (`supplier-cell.tsx`): al posarse sobre el nombre se consulta `GET /api/suppliers/:id` y se muestra un card flotante (portal + posición calculada, sin modal) con teléfono, email y página web.
 
-## 5. Pendientes conocidos
+## 5. Testing
+
+> **Regla obligatoria:** después de cada cambio o modificación en el código del Frontend se deben crear o ejecutar los tests correspondientes antes de dar el cambio por terminado. Esto aplica también al agente de código.
+
+- Todo cambio de comportamiento (lógica, componentes, hooks, formularios) debe acompañarse de su test.
+- Nunca se da por finalizada una modificación sin correr la suite de tests y que pase en verde.
+- Si el cambio rompe un test existente, se actualiza el test solo si el nuevo comportamiento es el esperado.
+
+### Stack y comandos
+
+- **Vitest 5** (entorno `jsdom`) + **Testing Library** (`react`, `jest-dom`, `user-event`).
+- Config en `vite.config.ts` (bloque `test`) y setup global en `src/test/setup.ts` (matchers de jest-dom + cleanup automático).
+- Los archivos de test van junto al código: `*.test.ts(x)` al lado del archivo que cubren.
+
+```bash
+npm test         # corre la suite una vez (CI / después de un cambio)
+npm run test:watch  # modo watch (desarrollo)
+```
+
+## 6. Pendientes conocidos
 
 - **ARCA / Facturación**: la emisión real de comprobantes sigue pendiente del backend (Fase 5: cola BullMQ + WSAA/WSFE); la vista y el modal "Generar factura" están listos pero no emiten.
 - **Empleados**: existe `new-employee-dialog.tsx` sin usar y con errores de TypeScript (`useQuery`/`employeesQuery` sin uso); falta decidir si se conecta el alta de empleados o se elimina.
 - **Proveedores**: falta edición y baja de proveedores (el backend ya expone `PATCH`/`DELETE /api/suppliers/:id`; el frontend solo tiene alta y listado).
 - **Tickets**: no hay edición de tickets existentes (solo alta y cambio de estado).
 
-## 6. Quickstart
+## 7. Quickstart
 
 ```bash
 npm install
@@ -125,3 +144,12 @@ npm run dev            # http://localhost:5173
 ```
 
 Requiere el backend corriendo en `:3000` (repo `Backend/`). Si no está levantado, el indicador del sidebar se muestra en rojo.
+
+### Entornos
+
+| Comando | Archivo que usa Vite | `VITE_API_URL` |
+|---|---|---|
+| `npm run dev` | `.env` | `http://localhost:3000/api` (backend local) |
+| `npm run build` | `.env.production` | `/api` (proxy de Render en `server.mjs`) |
+
+Nunca commitear un `dist/` construido con `.env` de desarrollo: el bundle llevaría `localhost` y rompe el login en producción.
