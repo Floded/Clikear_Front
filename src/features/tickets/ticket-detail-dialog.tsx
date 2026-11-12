@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -23,10 +24,15 @@ import { fetchEmployees } from "@/features/organization/organization.api";
 import {
   assignTicket,
   fetchTicketDetail,
+  ticketImageUrl,
   updateTicketStatus,
 } from "@/features/tickets/tickets.api";
+import { CloseTicketDialog } from "@/features/tickets/close-ticket-dialog";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
-import { TICKET_STATUSES } from "@/features/tickets/tickets.types";
+import {
+  ALLOWED_STATUS_TRANSITIONS,
+  type TicketStatus,
+} from "@/features/tickets/tickets.types";
 
 interface TicketDetailDialogProps {
   ticketId: string | null;
@@ -36,6 +42,7 @@ interface TicketDetailDialogProps {
 
 export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetailDialogProps) {
   const queryClient = useQueryClient();
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["ticket", ticketId],
@@ -149,22 +156,18 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
             <section className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold">Cambiar estado</h3>
-                <Select
-                  value={data.status}
-                  onValueChange={(v) => mutation.mutate(v)}
+                <StatusSelect
+                  currentStatus={(data.status as TicketStatus) ?? "ABIERTO"}
                   disabled={mutation.isPending}
-                >
-                  <SelectTrigger className="w-44">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TICKET_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onSelect={(next) => {
+                    // Cerrar exige evidencia: se hace en el dialog de cierre
+                    if (next === "TERMINADO") {
+                      setCloseDialogOpen(true);
+                      return;
+                    }
+                    mutation.mutate(next);
+                  }}
+                />
               </div>
             </section>
 
@@ -244,6 +247,25 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
               )}
             </section>
 
+            {/* Imágenes de cierre ya adjuntadas (solo lectura) */}
+            {data.images.length > 0 && (
+              <section className="space-y-2">
+                <h3 className="text-sm font-semibold">
+                  Imágenes de cierre ({data.images.length})
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {data.images.map((image) => (
+                    <img
+                      key={image.id}
+                      src={ticketImageUrl(image.fileName)}
+                      alt={image.fileName}
+                      className="h-20 w-20 rounded-md border object-cover"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {(data.invoices?.length ?? 0) > 0 && (
               <section className="space-y-2">
                 <h3 className="text-sm font-semibold">Facturas asociadas</h3>
@@ -276,7 +298,55 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
           </div>
         )}
       </DialogContent>
+
+      <CloseTicketDialog
+        ticketId={ticketId}
+        open={closeDialogOpen}
+        onOpenChange={(o) => {
+          setCloseDialogOpen(o);
+          if (!o) {
+            // Refresca por si se canceló o quedó estado optimista en el Select
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+            queryClient.invalidateQueries({ queryKey: ["ticket-images", ticketId] });
+          }
+        }}
+      />
     </Dialog>
+  );
+}
+
+// Select que solo ofrece la transición actual + las válidas según el backend
+function StatusSelect({
+  currentStatus,
+  disabled,
+  onSelect,
+}: {
+  currentStatus: TicketStatus;
+  disabled: boolean;
+  onSelect: (next: TicketStatus) => void;
+}) {
+  const options = [
+    currentStatus,
+    ...ALLOWED_STATUS_TRANSITIONS[currentStatus].filter((s) => s !== currentStatus),
+  ];
+
+  return (
+    <Select
+      value={currentStatus}
+      onValueChange={(v) => onSelect(v as TicketStatus)}
+      disabled={disabled}
+    >
+      <SelectTrigger className="w-44">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((s) => (
+          <SelectItem key={s} value={s} disabled={s === currentStatus}>
+            {s}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

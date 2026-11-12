@@ -5,10 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { toast } from "sonner";
 import { fetchEmployees } from "@/features/organization/organization.api";
+import { CloseTicketDialog } from "@/features/tickets/close-ticket-dialog";
 import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog";
 import {
   assignTicket,
   fetchTicketDetail,
+  fetchTicketImages,
   updateTicketStatus,
 } from "@/features/tickets/tickets.api";
 import type { TicketDetail } from "@/features/tickets/tickets.types";
@@ -17,6 +19,10 @@ vi.mock("@/features/tickets/tickets.api", () => ({
   fetchTicketDetail: vi.fn(),
   updateTicketStatus: vi.fn(),
   assignTicket: vi.fn(),
+  fetchTicketImages: vi.fn(),
+  uploadTicketImages: vi.fn(),
+  deleteTicketImage: vi.fn(),
+  ticketImageUrl: (fileName: string) => `http://test/uploads/tickets/${fileName}`,
 }));
 
 vi.mock("@/features/organization/organization.api", () => ({
@@ -34,6 +40,7 @@ const mockFetchTicketDetail = vi.mocked(fetchTicketDetail);
 const mockUpdateTicketStatus = vi.mocked(updateTicketStatus);
 const mockAssignTicket = vi.mocked(assignTicket);
 const mockFetchEmployees = vi.mocked(fetchEmployees);
+const mockFetchTicketImages = vi.mocked(fetchTicketImages);
 const mockToastSuccess = vi.mocked(toast.success);
 const mockToastError = vi.mocked(toast.error);
 
@@ -60,6 +67,7 @@ const ticketDetail: TicketDetail = {
   },
   assignments: [],
   invoices: [],
+  images: [],
 };
 
 function renderDialog(onOpenChange = vi.fn()) {
@@ -81,6 +89,7 @@ function renderDialog(onOpenChange = vi.fn()) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockFetchTicketDetail.mockResolvedValue(ticketDetail);
+  mockFetchTicketImages.mockResolvedValue([]);
   mockUpdateTicketStatus.mockResolvedValue({
     ticketId: "123",
     status: "EN PROGRESO",
@@ -202,5 +211,78 @@ describe("TicketDetailDialog", () => {
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Empleado inactivo"),
     );
+  });
+});
+
+describe("TicketDetailDialog estados", () => {
+  it("ofrece solo la transición actual y las válidas (ABIERTO)", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    const [statusSelect] = screen.getAllByRole("combobox");
+    await user.click(statusSelect);
+
+    const options = await screen.findAllByRole("option");
+    const names = options.map((o) => o.textContent);
+    expect(names).toEqual(["ABIERTO", "EN PROGRESO", "TERMINADO"]);
+  });
+
+  it("ofrece REABIERTO solo cuando el ticket está TERMINADO", async () => {
+    mockFetchTicketDetail.mockResolvedValue({ ...ticketDetail, status: "TERMINADO" });
+    const user = userEvent.setup();
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    const [statusSelect] = screen.getAllByRole("combobox");
+    await user.click(statusSelect);
+
+    const names = (await screen.findAllByRole("option")).map((o) => o.textContent);
+    expect(names).toEqual(["TERMINADO", "REABIERTO"]);
+  });
+
+  it("abre el dialog de cierre al elegir TERMINADO en lugar de mutar directo", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    const [statusSelect] = screen.getAllByRole("combobox");
+    await user.click(statusSelect);
+    await user.click(await screen.findByRole("option", { name: "TERMINADO" }));
+
+    expect(
+      await screen.findByText("Cerrar ticket 123"),
+    ).toBeInTheDocument();
+    expect(mockUpdateTicketStatus).not.toHaveBeenCalled();
+  });
+
+  it("muestra la sección de imágenes cuando el ticket tiene", async () => {
+    mockFetchTicketDetail.mockResolvedValue({
+      ...ticketDetail,
+      images: [
+        {
+          id: 1,
+          ticketId: "123",
+          fileName: "cierre.png",
+          mimeType: "image/png",
+          sizeBytes: 100,
+          createdAt: "2026-03-01T10:00:00Z",
+        },
+      ],
+    });
+    renderDialog();
+
+    expect(await screen.findByText("Imágenes de cierre (1)")).toBeInTheDocument();
+    expect(screen.getByAltText("cierre.png")).toHaveAttribute(
+      "src",
+      "http://test/uploads/tickets/cierre.png",
+    );
+  });
+
+  it("no muestra la sección de imágenes si no hay", async () => {
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    expect(screen.queryByText("Imágenes de cierre")).not.toBeInTheDocument();
   });
 });

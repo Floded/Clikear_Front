@@ -7,6 +7,7 @@ import type {
   EstablishmentInput,
   Paginated,
   TicketDetail,
+  TicketImage,
   TicketListItem,
   Technician,
 } from "./tickets.types";
@@ -45,6 +46,41 @@ export async function updateTicketStatus(
     { status },
   );
   return data;
+}
+
+// Imágenes de cierre del ticket: subir, listar y borrar
+export async function fetchTicketImages(id: string): Promise<TicketImage[]> {
+  const { data } = await api.get<TicketImage[]>(`/tickets/${id}/images`);
+  return data;
+}
+
+// URL pública de la imagen: <origin del backend>/uploads/tickets/<fileName>
+export function ticketImageUrl(fileName: string): string {
+  const base = api.defaults.baseURL ?? "";
+  const origin = base.replace(/\/api\/?$/, "");
+  return `${origin}/uploads/tickets/${fileName}`;
+}
+
+export async function uploadTicketImages(
+  id: string,
+  files: File[],
+): Promise<TicketImage[]> {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append("images", file);
+  }
+  const { data } = await api.post<TicketImage[]>(
+    `/tickets/${id}/images`,
+    formData,
+  );
+  return data;
+}
+
+export async function deleteTicketImage(
+  id: string,
+  imageId: number,
+): Promise<void> {
+  await api.delete(`/tickets/${id}/images/${imageId}`);
 }
 
 // Asigna (id > 0), reasigna o libera (employeeId null) el ticket

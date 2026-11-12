@@ -4,10 +4,13 @@ import { api } from "@/lib/api";
 import {
   assignTicket,
   createTicket,
+  deleteTicketImage,
   fetchEstablishmentByCue,
   fetchTicketDetail,
+  fetchTicketImages,
   fetchTickets,
   updateTicketStatus,
+  uploadTicketImages,
 } from "@/features/tickets/tickets.api";
 
 vi.mock("@/lib/api", () => ({
@@ -15,12 +18,14 @@ vi.mock("@/lib/api", () => ({
     get: vi.fn(),
     post: vi.fn(),
     patch: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 const mockGet = vi.mocked(api.get);
 const mockPost = vi.mocked(api.post);
 const mockPatch = vi.mocked(api.patch);
+const mockDelete = vi.mocked(api.delete);
 
 function axiosError(status: number) {
   return { isAxiosError: true, response: { status } };
@@ -93,6 +98,37 @@ describe("tickets.api", () => {
     mockGet.mockRejectedValue(axiosError(500));
 
     await expect(fetchEstablishmentByCue("700083300")).rejects.toBeTruthy();
+  });
+
+  it("fetchTicketImages gets the images list", async () => {
+    const images = [
+      { id: 1, ticketId: "123", fileName: "a.png", mimeType: "image/png", sizeBytes: 10, createdAt: "" },
+    ];
+    mockGet.mockResolvedValue({ data: images });
+
+    await expect(fetchTicketImages("123")).resolves.toEqual(images);
+    expect(mockGet).toHaveBeenCalledWith("/tickets/123/images");
+  });
+
+  it("uploadTicketImages posts a FormData with each file", async () => {
+    mockPost.mockResolvedValue({ data: [] });
+    const files = [new File(["a"], "a.png", { type: "image/png" })];
+
+    await uploadTicketImages("123", files);
+
+    expect(mockPost).toHaveBeenCalledTimes(1);
+    const [url, body] = mockPost.mock.calls[0];
+    expect(url).toBe("/tickets/123/images");
+    expect(body).toBeInstanceOf(FormData);
+    const formData = body as FormData;
+    expect(formData.getAll("images")).toEqual(files);
+  });
+
+  it("deleteTicketImage sends the DELETE request", async () => {
+    mockDelete.mockResolvedValue({ data: undefined });
+
+    await expect(deleteTicketImage("123", 7)).resolves.toBeUndefined();
+    expect(mockDelete).toHaveBeenCalledWith("/tickets/123/images/7");
   });
 
   it("createTicket serializes the BigInt id and the opening date", async () => {
