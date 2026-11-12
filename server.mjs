@@ -8,10 +8,11 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const DIST_PATH = path.resolve("dist");
 
-// Proxy hacia el backend
+// Proxy hacia el backend (API + archivos de tickets servidos en /uploads)
 app.use(
   createProxyMiddleware({
-    pathFilter: (pathname) => pathname.startsWith("/api"),
+    pathFilter: (pathname) =>
+      pathname.startsWith("/api") || pathname.startsWith("/uploads"),
     target: "https://clickear.onrender.com",
     changeOrigin: true,
     secure: true,
