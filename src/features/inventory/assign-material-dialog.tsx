@@ -109,7 +109,7 @@ export function AssignMaterialDialog({ open, onOpenChange }: AssignMaterialDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Asignar material a empleado</DialogTitle>
         </DialogHeader>

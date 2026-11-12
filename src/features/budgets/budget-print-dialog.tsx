@@ -24,7 +24,7 @@ export function BudgetPrintDialog({
 }) {
   return (
     <Dialog open={budget !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl print-dialog">
+      <DialogContent className="sm:max-w-2xl print-dialog">
         <DialogHeader className="no-print">
           <DialogTitle>Presupuesto {budget?.code}</DialogTitle>
         </DialogHeader>

@@ -183,7 +183,7 @@ export function InvoicesPage() {
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Generar factura</DialogTitle>
           </DialogHeader>
