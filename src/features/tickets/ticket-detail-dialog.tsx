@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -156,18 +157,25 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
             <section className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold">Cambiar estado</h3>
-                <StatusSelect
-                  currentStatus={(data.status as TicketStatus) ?? "ABIERTO"}
-                  disabled={mutation.isPending}
-                  onSelect={(next) => {
-                    // Cerrar exige evidencia: se hace en el dialog de cierre
-                    if (next === "TERMINADO") {
-                      setCloseDialogOpen(true);
-                      return;
-                    }
-                    mutation.mutate(next);
-                  }}
-                />
+                <div className="flex items-center gap-2">
+                  <StatusSelect
+                    currentStatus={(data.status as TicketStatus) ?? "ABIERTO"}
+                    disabled={mutation.isPending}
+                    onSelect={(next) => mutation.mutate(next)}
+                  />
+                  {/* El cierre es una acción explícita que exige evidencia */}
+                  {data.status !== "TERMINADO" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={mutation.isPending}
+                      onClick={() => setCloseDialogOpen(true)}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Finalizar ticket
+                    </Button>
+                  )}
+                </div>
               </div>
             </section>
 
@@ -315,7 +323,8 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
   );
 }
 
-// Select que solo ofrece la transición actual + las válidas según el backend
+// Select de estados de flujo: solo el actual + transiciones válidas, sin
+// TERMINADO (el cierre se hace con el botón "Finalizar ticket")
 function StatusSelect({
   currentStatus,
   disabled,
@@ -327,7 +336,9 @@ function StatusSelect({
 }) {
   const options = [
     currentStatus,
-    ...ALLOWED_STATUS_TRANSITIONS[currentStatus].filter((s) => s !== currentStatus),
+    ...ALLOWED_STATUS_TRANSITIONS[currentStatus].filter(
+      (s) => s !== currentStatus && s !== "TERMINADO",
+    ),
   ];
 
   return (

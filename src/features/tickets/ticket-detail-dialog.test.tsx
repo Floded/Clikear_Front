@@ -225,11 +225,11 @@ describe("TicketDetailDialog estados", () => {
 
     const options = await screen.findAllByRole("option");
     const names = options.map((o) => o.textContent);
-    expect(names).toEqual(["ABIERTO", "EN PROGRESO", "TERMINADO"]);
+    expect(names).toEqual(["ABIERTO", "EN PROGRESO"]);
   });
 
-  it("ofrece REABIERTO solo cuando el ticket está TERMINADO", async () => {
-    mockFetchTicketDetail.mockResolvedValue({ ...ticketDetail, status: "TERMINADO" });
+  it("oculta TERMINADO del Select para cualquier estado", async () => {
+    mockFetchTicketDetail.mockResolvedValue({ ...ticketDetail, status: "EN PROGRESO" });
     const user = userEvent.setup();
     renderDialog();
 
@@ -238,17 +238,35 @@ describe("TicketDetailDialog estados", () => {
     await user.click(statusSelect);
 
     const names = (await screen.findAllByRole("option")).map((o) => o.textContent);
-    expect(names).toEqual(["TERMINADO", "REABIERTO"]);
+    expect(names).toEqual(["EN PROGRESO"]);
+    expect(names).not.toContain("TERMINADO");
   });
 
-  it("abre el dialog de cierre al elegir TERMINADO en lugar de mutar directo", async () => {
+  it("muestra el botón Finalizar ticket mientras el ticket no está TERMINADO", async () => {
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    expect(
+      screen.getByRole("button", { name: /Finalizar ticket/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("no muestra el botón Finalizar ticket cuando el ticket está TERMINADO", async () => {
+    mockFetchTicketDetail.mockResolvedValue({ ...ticketDetail, status: "TERMINADO" });
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    expect(
+      screen.queryByRole("button", { name: /Finalizar ticket/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("abre el dialog de cierre desde el botón Finalizar ticket", async () => {
     const user = userEvent.setup();
     renderDialog();
 
     await screen.findByText("Falla total");
-    const [statusSelect] = screen.getAllByRole("combobox");
-    await user.click(statusSelect);
-    await user.click(await screen.findByRole("option", { name: "TERMINADO" }));
+    await user.click(screen.getByRole("button", { name: /Finalizar ticket/ }));
 
     expect(
       await screen.findByText("Cerrar ticket 123"),
