@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -23,10 +25,15 @@ import { fetchEmployees } from "@/features/organization/organization.api";
 import {
   assignTicket,
   fetchTicketDetail,
+  ticketImageUrl,
   updateTicketStatus,
 } from "@/features/tickets/tickets.api";
+import { CloseTicketDialog } from "@/features/tickets/close-ticket-dialog";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
-import { TICKET_STATUSES } from "@/features/tickets/tickets.types";
+import {
+  ALLOWED_STATUS_TRANSITIONS,
+  type TicketStatus,
+} from "@/features/tickets/tickets.types";
 
 interface TicketDetailDialogProps {
   ticketId: string | null;
@@ -36,6 +43,7 @@ interface TicketDetailDialogProps {
 
 export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetailDialogProps) {
   const queryClient = useQueryClient();
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["ticket", ticketId],
@@ -82,7 +90,7 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Ticket {ticketId}
@@ -107,7 +115,7 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
 
         {data && (
           <div className="space-y-5">
-            <section className="grid gap-3 sm:grid-cols-2">
+            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Field label="GLPI (cerrado)" value={data.glpiClosedTicket ?? "—"} />
               <Field
                 label="Apertura"
@@ -147,24 +155,27 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
             )}
 
             <section className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold">Cambiar estado</h3>
-                <Select
-                  value={data.status}
-                  onValueChange={(v) => mutation.mutate(v)}
-                  disabled={mutation.isPending}
-                >
-                  <SelectTrigger className="w-44">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TICKET_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <StatusSelect
+                    currentStatus={(data.status as TicketStatus) ?? "ABIERTO"}
+                    disabled={mutation.isPending}
+                    onSelect={(next) => mutation.mutate(next)}
+                  />
+                  {/* El cierre es una acción explícita que exige evidencia */}
+                  {data.status !== "TERMINADO" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={mutation.isPending}
+                      onClick={() => setCloseDialogOpen(true)}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Finalizar ticket
+                    </Button>
+                  )}
+                </div>
               </div>
             </section>
 
@@ -244,6 +255,25 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
               )}
             </section>
 
+            {/* Imágenes de cierre ya adjuntadas (solo lectura) */}
+            {data.images.length > 0 && (
+              <section className="space-y-2">
+                <h3 className="text-sm font-semibold">
+                  Imágenes de cierre ({data.images.length})
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {data.images.map((image) => (
+                    <img
+                      key={image.id}
+                      src={ticketImageUrl(image.fileName)}
+                      alt={image.fileName}
+                      className="h-20 w-20 rounded-md border object-cover"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {(data.invoices?.length ?? 0) > 0 && (
               <section className="space-y-2">
                 <h3 className="text-sm font-semibold">Facturas asociadas</h3>
@@ -276,7 +306,58 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
           </div>
         )}
       </DialogContent>
+
+      <CloseTicketDialog
+        ticketId={ticketId}
+        open={closeDialogOpen}
+        onOpenChange={(o) => {
+          setCloseDialogOpen(o);
+          if (!o) {
+            // Refresca por si se canceló o quedó estado optimista en el Select
+            queryClient.invalidateQueries({ queryKey: ["ticket", ticketId] });
+            queryClient.invalidateQueries({ queryKey: ["ticket-images", ticketId] });
+          }
+        }}
+      />
     </Dialog>
+  );
+}
+
+// Select de estados de flujo: solo el actual + transiciones válidas, sin
+// TERMINADO (el cierre se hace con el botón "Finalizar ticket")
+function StatusSelect({
+  currentStatus,
+  disabled,
+  onSelect,
+}: {
+  currentStatus: TicketStatus;
+  disabled: boolean;
+  onSelect: (next: TicketStatus) => void;
+}) {
+  const options = [
+    currentStatus,
+    ...ALLOWED_STATUS_TRANSITIONS[currentStatus].filter(
+      (s) => s !== currentStatus && s !== "TERMINADO",
+    ),
+  ];
+
+  return (
+    <Select
+      value={currentStatus}
+      onValueChange={(v) => onSelect(v as TicketStatus)}
+      disabled={disabled}
+    >
+      <SelectTrigger className="w-44">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((s) => (
+          <SelectItem key={s} value={s} disabled={s === currentStatus}>
+            {s}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

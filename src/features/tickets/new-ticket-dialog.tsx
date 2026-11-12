@@ -40,7 +40,7 @@ const createTicketSchema = z.object({
   establishmentAddress: z.string().trim().max(255).optional(),
   establishmentPhone: z.string().trim().max(50).optional(),
   title: z.string().trim().min(1, { message: "El título es obligatorio" }),
-  status: z.enum(["ABIERTO", "EN PROGRESO", "TERMINADO"]).optional(),
+  status: z.enum(["ABIERTO", "EN PROGRESO"]).optional(),
   glpiClosedTicket: z.string().trim().max(100).optional(),
   openingTimestamp: z.string().optional(),
 });
@@ -260,7 +260,6 @@ export function NewTicketDialog({ open, onOpenChange }: { open: boolean; onOpenC
                 <SelectContent>
                   <SelectItem value="ABIERTO">ABIERTO</SelectItem>
                   <SelectItem value="EN PROGRESO">EN PROGRESO</SelectItem>
-                  <SelectItem value="TERMINADO">TERMINADO</SelectItem>
                 </SelectContent>
               </Select>
               {form.formState.errors.status && (
