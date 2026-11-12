@@ -90,7 +90,15 @@ beforeEach(() => {
     assignedEmployee: { id: 10, fullName: "Juan Gómez" },
   });
   mockFetchEmployees.mockResolvedValue({
-    data: [{ id: 10, fullName: "Juan Gómez", isActive: true }],
+    data: [
+      {
+        id: 10,
+        fullName: "Juan Gómez",
+        dniOrFileNumber: "98765432",
+        phone: null,
+        isActive: true,
+      },
+    ],
     page: 1,
     limit: 100,
     total: 1,

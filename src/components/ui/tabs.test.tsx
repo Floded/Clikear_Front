@@ -15,13 +15,13 @@ describe("Tabs", () => {
   describe("Tabs", () => {
     it("renders default horizontal tabs", () => {
       const { container } = render(
-        <Tabs>
+        <Tabs defaultValue="opt-1">
           <TabsList>
-            <TabsTrigger>Opción 1</TabsTrigger>
-            <TabsTrigger>Opción 2</TabsTrigger>
+            <TabsTrigger value="opt-1">Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-2">Opción 2</TabsTrigger>
           </TabsList>
-          <TabsContent>Contenido 1</TabsContent>
-          <TabsContent>Contenido 2</TabsContent>
+          <TabsContent value="opt-1">Contenido 1</TabsContent>
+          <TabsContent value="opt-2">Contenido 2</TabsContent>
         </Tabs>
       );
 
@@ -36,13 +36,13 @@ describe("Tabs", () => {
 
     it("renders with vertical orientation", () => {
       const { container } = render(
-        <Tabs orientation="vertical">
+        <Tabs orientation="vertical" defaultValue="opt-1">
           <TabsList>
-            <TabsTrigger>Opción 1</TabsTrigger>
-            <TabsTrigger>Opción 2</TabsTrigger>
+            <TabsTrigger value="opt-1">Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-2">Opción 2</TabsTrigger>
           </TabsList>
-          <TabsContent>Contenido 1</TabsContent>
-          <TabsContent>Contenido 2</TabsContent>
+          <TabsContent value="opt-1">Contenido 1</TabsContent>
+          <TabsContent value="opt-2">Contenido 2</TabsContent>
         </Tabs>
       );
 
@@ -59,10 +59,10 @@ describe("Tabs", () => {
   describe("TabsList", () => {
     it("renders default list", () => {
       const { container } = render(
-        <Tabs>
+        <Tabs defaultValue="opt-1">
           <TabsList>
-            <TabsTrigger>Opción 1</TabsTrigger>
-            <TabsTrigger>Opción 2</TabsTrigger>
+            <TabsTrigger value="opt-1">Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-2">Opción 2</TabsTrigger>
           </TabsList>
         </Tabs>
       );
@@ -76,10 +76,10 @@ describe("Tabs", () => {
 
     it("renders with line variant", () => {
       const { container } = render(
-        <Tabs>
+        <Tabs defaultValue="opt-1">
           <TabsList variant="line">
-            <TabsTrigger>Opción 1</TabsTrigger>
-            <TabsTrigger>Opción 2</TabsTrigger>
+            <TabsTrigger value="opt-1">Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-2">Opción 2</TabsTrigger>
           </TabsList>
         </Tabs>
       );
@@ -94,9 +94,9 @@ describe("Tabs", () => {
   describe("TabsTrigger", () => {
     it("renders default trigger", () => {
       const { container } = render(
-        <Tabs>
+        <Tabs defaultValue="opt-1">
           <TabsList>
-            <TabsTrigger>Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-1">Opción 1</TabsTrigger>
           </TabsList>
         </Tabs>
       );
@@ -110,7 +110,7 @@ describe("Tabs", () => {
       const { container } = render(
         <Tabs>
           <TabsList>
-            <TabsTrigger data-state="active">Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-1" data-state="active">Opción 1</TabsTrigger>
           </TabsList>
         </Tabs>
       );
@@ -125,11 +125,11 @@ describe("Tabs", () => {
   describe("TabsContent", () => {
     it("renders default content", () => {
       const { container } = render(
-        <Tabs>
+        <Tabs defaultValue="opt-1">
           <TabsList>
-            <TabsTrigger>Opción 1</TabsTrigger>
+            <TabsTrigger value="opt-1">Opción 1</TabsTrigger>
           </TabsList>
-          <TabsContent>Contenido</TabsContent>
+          <TabsContent value="opt-1">Contenido</TabsContent>
         </Tabs>
       );
 

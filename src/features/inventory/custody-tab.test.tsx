@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
 
@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { CustodyTab } from "@/features/inventory/custody-tab";
 import { fetchCustody, returnAssignment } from "@/features/inventory/inventory.api";
 import { fetchEmployees } from "@/features/organization/organization.api";
-import type { Assignment, Employee } from "@/features/inventory/inventory.types";
+import type { Employee } from "@/features/organization/organization.types";
+import type { Assignment } from "@/features/inventory/inventory.types";
 
 vi.mock("@/features/inventory/inventory.api", () => ({
   fetchCustody: vi.fn(),
