@@ -4,18 +4,31 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TicketsPage } from "@/pages/tickets/tickets-page";
-import { fetchTickets, fetchTechnicians } from "@/features/tickets/tickets.api";
+import {
+  exportTicketsExcel,
+  fetchTickets,
+  fetchTechnicians,
+} from "@/features/tickets/tickets.api";
 import { fetchEmployees } from "@/features/organization/organization.api";
+import { toast } from "sonner";
 import type { TicketListItem, Paginated, Technician } from "@/features/tickets/tickets.types";
 import type { Employee } from "@/features/organization/organization.types";
 
 vi.mock("@/features/tickets/tickets.api", () => ({
   fetchTickets: vi.fn(),
   fetchTechnicians: vi.fn(),
+  exportTicketsExcel: vi.fn(),
 }));
 
 vi.mock("@/features/organization/organization.api", () => ({
   fetchEmployees: vi.fn(),
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 vi.mock("@/features/tickets/ticket-filters", () => ({
@@ -31,6 +44,9 @@ vi.mock("@/features/tickets/new-ticket-dialog", () => ({
 const mockFetchTickets = vi.mocked(fetchTickets);
 const mockFetchTechnicians = vi.mocked(fetchTechnicians);
 const mockFetchEmployees = vi.mocked(fetchEmployees);
+const mockExportTicketsExcel = vi.mocked(exportTicketsExcel);
+const mockToastSuccess = vi.mocked(toast.success);
+const mockToastError = vi.mocked(toast.error);
 
 const ticket: TicketListItem = {
   ticketId: "T-001",
@@ -72,6 +88,7 @@ beforeEach(() => {
   mockFetchTickets.mockResolvedValue(ticketsPage([ticket]));
   mockFetchTechnicians.mockResolvedValue(emptyPaginated<Technician>());
   mockFetchEmployees.mockResolvedValue(emptyPaginated<Employee>());
+  mockExportTicketsExcel.mockResolvedValue(undefined);
 });
 
 describe("TicketsPage", () => {
@@ -97,8 +114,7 @@ describe("TicketsPage", () => {
 
   it("shows the empty state when no tickets match", async () => {
     mockFetchTickets.mockResolvedValue(ticketsPage([]));
-    renderTicketsPage();
-    expect(
+    renderTicketsPage();    expect(
       await screen.findByText("Sin resultados para los filtros actuales."),
     ).toBeInTheDocument();
   });
@@ -137,5 +153,64 @@ describe("TicketsPage", () => {
     renderTicketsPage();
     await user.click(screen.getByRole("button", { name: "Nuevo ticket" }));
     expect(screen.getByTestId("new-ticket-dialog")).toBeInTheDocument();
+  });
+
+  it("exporta el Excel al hacer clic y avisa con un toast", async () => {
+    const user = userEvent.setup();
+    renderTicketsPage();
+
+    await screen.findByText("T-001");
+    await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+
+    await waitFor(() =>
+      expect(mockExportTicketsExcel).toHaveBeenCalledWith(
+        {
+          status: undefined,
+          establishment: undefined,
+          technicianId: undefined,
+          employeeId: undefined,
+          search: undefined,
+        },
+        { from: undefined, to: undefined },
+      ),
+    );
+    expect(mockToastSuccess).toHaveBeenCalledWith("Excel descargado");
+  });
+
+  it("exporta con el rango de fechas completado", async () => {
+    const user = userEvent.setup();
+    renderTicketsPage();
+
+    await screen.findByText("T-001");
+    fireEvent.change(screen.getByLabelText("Exportar desde"), {
+      target: { value: "2026-06-01" },
+    });
+    fireEvent.change(screen.getByLabelText("Exportar hasta"), {
+      target: { value: "2026-06-30" },
+    });
+    await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+
+    await waitFor(() => {
+      const [, range] = mockExportTicketsExcel.mock.calls[0];
+      expect(new Date(range?.from as string).getTime()).toBe(
+        new Date("2026-06-01T00:00:00").getTime(),
+      );
+      expect(new Date(range?.to as string).getTime()).toBe(
+        new Date("2026-06-30T23:59:59.999").getTime(),
+      );
+    });
+  });
+
+  it("avisa con toast de error si la exportación falla", async () => {
+    mockExportTicketsExcel.mockRejectedValue(new Error("down"));
+    const user = userEvent.setup();
+    renderTicketsPage();
+
+    await screen.findByText("T-001");
+    await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("No se pudo exportar"),
+    );
   });
 });
