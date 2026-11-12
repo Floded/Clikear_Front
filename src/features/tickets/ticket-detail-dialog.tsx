@@ -255,14 +255,15 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
               )}
             </section>
 
-            {/* Imágenes de cierre ya adjuntadas (solo lectura) */}
-            {data.images.length > 0 && (
+            {/* Imágenes de cierre ya adjuntadas (solo lectura).
+                `?? []` defensivo: un backend sin el campo images no debe crashear */}
+            {(data.images ?? []).length > 0 && (
               <section className="space-y-2">
                 <h3 className="text-sm font-semibold">
-                  Imágenes de cierre ({data.images.length})
+                  Imágenes de cierre ({(data.images ?? []).length})
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {data.images.map((image) => (
+                  {(data.images ?? []).map((image) => (
                     <img
                       key={image.id}
                       src={ticketImageUrl(image.fileName)}

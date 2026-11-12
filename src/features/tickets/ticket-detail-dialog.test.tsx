@@ -297,6 +297,16 @@ describe("TicketDetailDialog estados", () => {
     );
   });
 
+  it("no crashea si el backend no envía el campo images", async () => {
+    // Backend viejo desplegado: el detalle llega sin `images`
+    const { images: _omitted, ...withoutImages } = ticketDetail;
+    mockFetchTicketDetail.mockResolvedValue(withoutImages);
+    renderDialog();
+
+    await screen.findByText("Falla total");
+    expect(screen.queryByText(/Imágenes de cierre/)).not.toBeInTheDocument();
+  });
+
   it("no muestra la sección de imágenes si no hay", async () => {
     renderDialog();
 
