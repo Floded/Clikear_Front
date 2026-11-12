@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { api } from "@/lib/api";
+import { downloadExcel } from "@/lib/download";
 
 import type {
   EstablishmentDetail,
@@ -46,6 +47,16 @@ export async function updateTicketStatus(
     { status },
   );
   return data;
+}
+
+// Exporta todos los tickets (con los mismos filtros del listado) a Excel
+export async function exportTicketsExcel(
+  filters: Pick<
+    TicketListQuery,
+    "status" | "establishment" | "technicianId" | "employeeId" | "search"
+  >,
+): Promise<void> {
+  await downloadExcel("/tickets/export", "tickets.xlsx", filters);
 }
 
 // Imágenes de cierre del ticket: subir, listar y borrar

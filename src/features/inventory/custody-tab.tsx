@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const TODAY = new Date().toISOString().slice(0, 10);
-import { Input } from "@/components/ui/input";
-import {
+import { Input } from "@/components/ui/input";import {
   Select,
   SelectContent,
   SelectItem,
@@ -25,7 +25,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-import { fetchCustody, returnAssignment } from "@/features/inventory/inventory.api";
+import {
+  exportAssignmentsExcel,
+  fetchCustody,
+  returnAssignment,
+} from "@/features/inventory/inventory.api";
 import type { Assignment } from "@/features/inventory/inventory.types";
 import { fetchEmployees } from "@/features/organization/organization.api";
 import type { Employee } from "@/features/organization/organization.types";
@@ -64,8 +68,14 @@ export function CustodyTab() {
     enabled: custodyOpen && selectedEmployee !== null,
   });
 
-  const returnMutation = useMutation({
-    mutationFn: (input: { id: number; quantity?: number; returnDate?: string; notes?: string }) =>
+  // Exporta todas las asignaciones de inventario (el endpoint no filtra por nombre)
+  const exportMutation = useMutation({
+    mutationFn: exportAssignmentsExcel,
+    onSuccess: () => toast.success("Excel descargado"),
+    onError: () => toast.error("No se pudo exportar"),
+  });
+
+  const returnMutation = useMutation({    mutationFn: (input: { id: number; quantity?: number; returnDate?: string; notes?: string }) =>
       returnAssignment(input.id, {
         quantity: input.quantity,
         returnDate: input.returnDate,
@@ -118,6 +128,17 @@ export function CustodyTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          disabled={exportMutation.isPending}
+          onClick={() => exportMutation.mutate()}
+        >
+          <Download className="size-4" aria-hidden />
+          {exportMutation.isPending ? "Exportando…" : "Exportar Excel"}
+        </Button>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
         <Input
           placeholder="Buscar empleado…"

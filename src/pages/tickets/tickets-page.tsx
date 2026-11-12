@@ -1,12 +1,18 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { fetchEmployees } from "@/features/organization/organization.api";
-import { fetchTickets, fetchTechnicians } from "@/features/tickets/tickets.api";
+import {
+  exportTicketsExcel,
+  fetchTickets,
+  fetchTechnicians,
+} from "@/features/tickets/tickets.api";
 import { TicketFilters, type TicketFiltersState } from "@/features/tickets/ticket-filters";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
 import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog";
@@ -81,6 +87,20 @@ export function TicketsPage() {
     setDetailOpen(true);
   };
 
+  // Exporta respetando los filtros activos (sin paginación: son todos)
+  const exportMutation = useMutation({
+    mutationFn: () =>
+      exportTicketsExcel({
+        status: queryFilters.status,
+        establishment: queryFilters.establishment,
+        technicianId: queryFilters.technicianId,
+        employeeId: queryFilters.employeeId,
+        search: queryFilters.search,
+      }),
+    onSuccess: () => toast.success("Excel descargado"),
+    onError: () => toast.error("No se pudo exportar"),
+  });
+
   return (
     <section className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -90,7 +110,17 @@ export function TicketsPage() {
             Hojas de ruta y tickets por establecimiento.
           </p>
         </div>
-        <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            disabled={exportMutation.isPending}
+            onClick={() => exportMutation.mutate()}
+          >
+            <Download className="size-4" aria-hidden />
+            {exportMutation.isPending ? "Exportando…" : "Exportar Excel"}
+          </Button>
+          <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
+        </div>
       </div>
 
       <TicketFilters
