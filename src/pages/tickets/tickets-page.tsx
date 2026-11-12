@@ -13,6 +13,8 @@ import {
   fetchTickets,
   fetchTechnicians,
 } from "@/features/tickets/tickets.api";
+import { Input } from "@/components/ui/input";
+import { dateRangeToParams } from "@/lib/download";
 import { TicketFilters, type TicketFiltersState } from "@/features/tickets/ticket-filters";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
 import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog";
@@ -33,6 +35,8 @@ export function TicketsPage() {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [newTicketOpen, setNewTicketOpen] = useState(false);
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
 
   const queryFilters = useMemo(
     () => ({
@@ -87,16 +91,19 @@ export function TicketsPage() {
     setDetailOpen(true);
   };
 
-  // Exporta respetando los filtros activos (sin paginación: son todos)
+  // Exporta respetando los filtros activos y el rango de apertura (sin paginar)
   const exportMutation = useMutation({
     mutationFn: () =>
-      exportTicketsExcel({
-        status: queryFilters.status,
-        establishment: queryFilters.establishment,
-        technicianId: queryFilters.technicianId,
-        employeeId: queryFilters.employeeId,
-        search: queryFilters.search,
-      }),
+      exportTicketsExcel(
+        {
+          status: queryFilters.status,
+          establishment: queryFilters.establishment,
+          technicianId: queryFilters.technicianId,
+          employeeId: queryFilters.employeeId,
+          search: queryFilters.search,
+        },
+        dateRangeToParams(exportFrom, exportTo),
+      ),
     onSuccess: () => toast.success("Excel descargado"),
     onError: () => toast.error("No se pudo exportar"),
   });
@@ -110,7 +117,21 @@ export function TicketsPage() {
             Hojas de ruta y tickets por establecimiento.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Input
+            type="date"
+            aria-label="Exportar desde"
+            className="w-36"
+            value={exportFrom}
+            onChange={(e) => setExportFrom(e.target.value)}
+          />
+          <Input
+            type="date"
+            aria-label="Exportar hasta"
+            className="w-36"
+            value={exportTo}
+            onChange={(e) => setExportTo(e.target.value)}
+          />
           <Button
             variant="outline"
             disabled={exportMutation.isPending}

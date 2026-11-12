@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "@/lib/api";
-import { downloadExcel, saveBlob } from "@/lib/download";
+import { dateRangeToParams, downloadExcel, saveBlob } from "@/lib/download";
 
 vi.mock("@/lib/api", () => ({
   api: {
@@ -61,5 +61,27 @@ describe("downloadExcel", () => {
 
     expect(downloadSpy).toHaveBeenCalledWith("asignaciones.xlsx");
     downloadSpy.mockRestore();
+  });
+});
+
+describe("dateRangeToParams", () => {
+  it("convierte de/hasta en ISO de inicio y fin de día", () => {
+    const params = dateRangeToParams("2026-06-01", "2026-06-30");
+
+    // Comparación por timestamp para no depender de la zona horaria del runner
+    expect(new Date(params.from as string).getTime()).toBe(
+      new Date("2026-06-01T00:00:00").getTime(),
+    );
+    expect(new Date(params.to as string).getTime()).toBe(
+      new Date("2026-06-30T23:59:59.999").getTime(),
+    );
+  });
+
+  it("devuelve undefined cuando no hay fechas", () => {
+    expect(dateRangeToParams()).toEqual({ from: undefined, to: undefined });
+    expect(dateRangeToParams("2026-06-01")).toEqual({
+      from: expect.any(String),
+      to: undefined,
+    });
   });
 });

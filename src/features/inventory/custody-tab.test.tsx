@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
 
@@ -217,8 +217,38 @@ describe("CustodyTab", () => {
     await screen.findByText("Juan Pérez");
     await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
 
-    await waitFor(() => expect(mockExportAssignmentsExcel).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(mockExportAssignmentsExcel).toHaveBeenCalledWith({
+        from: undefined,
+        to: undefined,
+      }),
+    );
     expect(mockToastSuccess).toHaveBeenCalledWith("Excel descargado");
+  });
+
+  it("exporta con el rango de fechas completado", async () => {
+    mockExportAssignmentsExcel.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderCustodyTab();
+
+    await screen.findByText("Juan Pérez");
+    fireEvent.change(screen.getByLabelText("Exportar desde"), {
+      target: { value: "2026-06-01" },
+    });
+    fireEvent.change(screen.getByLabelText("Exportar hasta"), {
+      target: { value: "2026-06-30" },
+    });
+    await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+
+    await waitFor(() => {
+      const [range] = mockExportAssignmentsExcel.mock.calls[0];
+      expect(new Date(range?.from as string).getTime()).toBe(
+        new Date("2026-06-01T00:00:00").getTime(),
+      );
+      expect(new Date(range?.to as string).getTime()).toBe(
+        new Date("2026-06-30T23:59:59.999").getTime(),
+      );
+    });
   });
 
   it("avisa con toast de error si la exportación falla", async () => {

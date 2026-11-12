@@ -163,15 +163,42 @@ describe("TicketsPage", () => {
     await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
 
     await waitFor(() =>
-      expect(mockExportTicketsExcel).toHaveBeenCalledWith({
-        status: undefined,
-        establishment: undefined,
-        technicianId: undefined,
-        employeeId: undefined,
-        search: undefined,
-      }),
+      expect(mockExportTicketsExcel).toHaveBeenCalledWith(
+        {
+          status: undefined,
+          establishment: undefined,
+          technicianId: undefined,
+          employeeId: undefined,
+          search: undefined,
+        },
+        { from: undefined, to: undefined },
+      ),
     );
     expect(mockToastSuccess).toHaveBeenCalledWith("Excel descargado");
+  });
+
+  it("exporta con el rango de fechas completado", async () => {
+    const user = userEvent.setup();
+    renderTicketsPage();
+
+    await screen.findByText("T-001");
+    fireEvent.change(screen.getByLabelText("Exportar desde"), {
+      target: { value: "2026-06-01" },
+    });
+    fireEvent.change(screen.getByLabelText("Exportar hasta"), {
+      target: { value: "2026-06-30" },
+    });
+    await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+
+    await waitFor(() => {
+      const [, range] = mockExportTicketsExcel.mock.calls[0];
+      expect(new Date(range?.from as string).getTime()).toBe(
+        new Date("2026-06-01T00:00:00").getTime(),
+      );
+      expect(new Date(range?.to as string).getTime()).toBe(
+        new Date("2026-06-30T23:59:59.999").getTime(),
+      );
+    });
   });
 
   it("avisa con toast de error si la exportación falla", async () => {

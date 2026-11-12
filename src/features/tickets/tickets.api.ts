@@ -49,14 +49,16 @@ export async function updateTicketStatus(
   return data;
 }
 
-// Exporta todos los tickets (con los mismos filtros del listado) a Excel
+// Exporta todos los tickets (con los mismos filtros del listado) a Excel.
+// from/to en ISO con inicio/fin de día locales
 export async function exportTicketsExcel(
   filters: Pick<
     TicketListQuery,
     "status" | "establishment" | "technicianId" | "employeeId" | "search"
   >,
+  range?: { from?: string; to?: string },
 ): Promise<void> {
-  await downloadExcel("/tickets/export", "tickets.xlsx", filters);
+  await downloadExcel("/tickets/export", "tickets.xlsx", { ...filters, ...range });
 }
 
 // Imágenes de cierre del ticket: subir, listar y borrar

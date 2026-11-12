@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { dateRangeToParams } from "@/lib/download";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,8 @@ export function CustodyTab() {
   const [returnQty, setReturnQty] = useState<string>("");
   const [returnDate, setReturnDate] = useState<string>("");
   const [returnNotes, setReturnNotes] = useState<string>("");
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
 
   const employeesQuery = useQuery({
     queryKey: ["employees", debouncedSearch, activeFilter, page],
@@ -68,9 +71,9 @@ export function CustodyTab() {
     enabled: custodyOpen && selectedEmployee !== null,
   });
 
-  // Exporta todas las asignaciones de inventario (el endpoint no filtra por nombre)
+  // Exporta las asignaciones filtradas por rango de entrega (sin paginar)
   const exportMutation = useMutation({
-    mutationFn: exportAssignmentsExcel,
+    mutationFn: () => exportAssignmentsExcel(dateRangeToParams(exportFrom, exportTo)),
     onSuccess: () => toast.success("Excel descargado"),
     onError: () => toast.error("No se pudo exportar"),
   });
@@ -128,7 +131,21 @@ export function CustodyTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <Input
+          type="date"
+          aria-label="Exportar desde"
+          className="w-36"
+          value={exportFrom}
+          onChange={(e) => setExportFrom(e.target.value)}
+        />
+        <Input
+          type="date"
+          aria-label="Exportar hasta"
+          className="w-36"
+          value={exportTo}
+          onChange={(e) => setExportTo(e.target.value)}
+        />
         <Button
           variant="outline"
           disabled={exportMutation.isPending}

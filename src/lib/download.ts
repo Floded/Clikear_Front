@@ -26,3 +26,17 @@ export async function downloadExcel(
     /filename="([^"]+)"/.exec(disposition)?.[1] ?? fallbackName;
   saveBlob(response.data as Blob, filename);
 }
+
+/**
+ * Convierte fechas de input (yyyy-mm-dd) en rango ISO local:
+ * from = inicio del día, to = fin del día (rango inclusivo).
+ */
+export function dateRangeToParams(
+  from?: string,
+  to?: string,
+): { from?: string; to?: string } {
+  return {
+    from: from ? new Date(`${from}T00:00:00`).toISOString() : undefined,
+    to: to ? new Date(`${to}T23:59:59.999`).toISOString() : undefined,
+  };
+}

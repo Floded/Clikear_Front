@@ -22,3 +22,7 @@
 - [x] Crear vista de facturación con indicador visual del estado de CAE de ARCA (Badge de pendiente/aprobado). → tabla + `InvoiceStatusBadge` + filtro.
 - [x] Agregar estados de carga (`Skeleton Loaders`) en tablas y modales. → tickets, stock, custodia, facturación.
 - [x] Manejo visual de errores en peticiones HTTP mediante Notificaciones / Toasts. → Sonner en mutaciones + estados de error inline.
+
+### Fase 5 ⬜ Exportaciones
+- [x] Exportar a Excel los tickets y las asignaciones de inventario. → botones "Exportar Excel" (tickets respeta filtros activos) + `lib/download.ts`.
+- [x] Rango de fechas (Desde / Hasta) en ambas exportaciones: tickets por fecha de apertura, asignaciones por fecha de entrega. → `dateRangeToParams` envía ISO de inicio/fin de día; sin fechas = exporta todo. Mergeado a `dev`.
