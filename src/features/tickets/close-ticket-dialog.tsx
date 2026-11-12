@@ -129,7 +129,7 @@ export function CloseTicketDialog({ ticketId, open, onOpenChange }: CloseTicketD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Cerrar ticket {ticketId}</DialogTitle>
           <DialogDescription>

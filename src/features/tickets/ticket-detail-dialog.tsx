@@ -90,7 +90,7 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Ticket {ticketId}
@@ -115,7 +115,7 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
 
         {data && (
           <div className="space-y-5">
-            <section className="grid gap-3 sm:grid-cols-2">
+            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Field label="GLPI (cerrado)" value={data.glpiClosedTicket ?? "—"} />
               <Field
                 label="Apertura"
@@ -155,7 +155,7 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
             )}
 
             <section className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold">Cambiar estado</h3>
                 <div className="flex items-center gap-2">
                   <StatusSelect
