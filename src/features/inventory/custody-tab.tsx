@@ -235,7 +235,7 @@ export function CustodyTab() {
 
       {/* Modal de custodia */}
       <Dialog open={custodyOpen} onOpenChange={setCustodyOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               Custodia — {selectedEmployee?.fullName}
