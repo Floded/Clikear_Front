@@ -29,6 +29,7 @@ import {
   updateTicketStatus,
 } from "@/features/tickets/tickets.api";
 import { CloseTicketDialog } from "@/features/tickets/close-ticket-dialog";
+import { ImageLightbox } from "@/features/tickets/image-lightbox";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
 import {
   ALLOWED_STATUS_TRANSITIONS,
@@ -44,6 +45,7 @@ interface TicketDetailDialogProps {
 export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetailDialogProps) {
   const queryClient = useQueryClient();
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["ticket", ticketId],
@@ -263,13 +265,19 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
                   Imágenes de cierre ({(data.images ?? []).length})
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {(data.images ?? []).map((image) => (
-                    <img
+                  {(data.images ?? []).map((image, i) => (
+                    <button
                       key={image.id}
-                      src={ticketImageUrl(image.fileName)}
-                      alt={image.fileName}
-                      className="h-20 w-20 rounded-md border object-cover"
-                    />
+                      type="button"
+                      className="cursor-zoom-in"
+                      onClick={() => setLightboxIndex(i)}
+                    >
+                      <img
+                        src={ticketImageUrl(image.fileName)}
+                        alt={image.fileName}
+                        className="h-20 w-20 rounded-md border object-cover transition-opacity hover:opacity-80"
+                      />
+                    </button>
                   ))}
                 </div>
               </section>
@@ -306,6 +314,12 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
             )}
           </div>
         )}
+
+        <ImageLightbox
+          images={data?.images ?? []}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+        />
       </DialogContent>
 
       <CloseTicketDialog
