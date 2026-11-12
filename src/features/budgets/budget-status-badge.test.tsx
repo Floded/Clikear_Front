@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { BudgetStatusBadge } from "@/features/budgets/budget-status-badge";
+import { BudgetStatus, BudgetStatusBadge } from "@/features/budgets/budget-status-badge";
 
 describe("BudgetStatusBadge", () => {
-  it.each([
+  it.each<[BudgetStatus, string]>([
     ["DRAFT", "Borrador"],
     ["SENT", "Enviado"],
     ["APPROVED", "Aprobado"],
