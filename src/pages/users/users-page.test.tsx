@@ -36,8 +36,15 @@ const mockCreateUser = vi.mocked(createUser);
 const mockDeleteUser = vi.mocked(deleteUser);
 
 const users: AppUser[] = [
-  { id: 1, username: "admin", name: "Admin", role: "ADMIN", createdAt: "2026-01-01" },
-  { id: 2, username: "ana", name: "Ana Pérez", role: "GESTOR", createdAt: "2026-01-02" },
+  { id: 1, username: "admin", name: "Admin", role: "ADMIN", createdAt: "2026-01-01", permissions: [] },
+  {
+    id: 2,
+    username: "ana",
+    name: "Ana Pérez",
+    role: "GESTOR",
+    createdAt: "2026-01-02",
+    permissions: [{ feature: "tickets", access: "EDIT" }],
+  },
 ];
 
 function renderPage() {
@@ -55,7 +62,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  sessionMock.data = { id: 1, username: "admin", name: "Admin", role: "ADMIN" };
+  sessionMock.data = { id: 1, username: "admin", name: "Admin", role: "ADMIN", permissions: [] };
   mockFetchUsers.mockResolvedValue(users);
 });
 
@@ -70,7 +77,13 @@ describe("UsersPage", () => {
   });
 
   it("redirige a /tickets si el usuario no es ADMIN", async () => {
-    sessionMock.data = { id: 2, username: "ana", name: "Ana", role: "GESTOR" };
+    sessionMock.data = {
+      id: 2,
+      username: "ana",
+      name: "Ana",
+      role: "GESTOR",
+      permissions: [{ feature: "tickets", access: "EDIT" }],
+    };
     renderPage();
 
     await waitFor(() => {
@@ -88,8 +101,9 @@ describe("UsersPage", () => {
         id: 3,
         username: "nuevo",
         name: "Nuevo Usuario",
-        role: "REVISADOR",
+        role: "GESTOR",
         createdAt: "2026-01-03",
+        permissions: [{ feature: "tickets", access: "EDIT" }],
       });
       const user = userEvent.setup();
       renderPage();
@@ -99,6 +113,9 @@ describe("UsersPage", () => {
       await user.type(screen.getByLabelText("Nombre"), "Nuevo Usuario");
       await user.type(screen.getByLabelText("Contraseña"), "ClaveSegura99!");
 
+      await user.click(screen.getByRole("combobox", { name: "Permiso para Tickets" }));
+      await user.click(await screen.findByRole("option", { name: "Ver y editar" }));
+
       await user.click(screen.getByRole("button", { name: "Crear usuario" }));
 
       await waitFor(() =>
@@ -107,6 +124,7 @@ describe("UsersPage", () => {
           name: "Nuevo Usuario",
           password: "ClaveSegura99!",
           role: "GESTOR",
+          permissions: [{ feature: "tickets", access: "EDIT" }],
         }),
       );
     },

@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 
+import type { FeaturePermission } from "@/features/auth/auth.types";
 import type { AppUser } from "./users.types";
 
 export interface CreateUserInput {
@@ -7,6 +8,7 @@ export interface CreateUserInput {
   name: string;
   password: string;
   role: string;
+  permissions: FeaturePermission[];
 }
 
 export interface UpdateUserInput {
@@ -14,6 +16,7 @@ export interface UpdateUserInput {
   name?: string;
   password?: string;
   role?: string;
+  permissions?: FeaturePermission[];
 }
 
 export async function fetchUsers(): Promise<AppUser[]> {

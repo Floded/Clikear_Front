@@ -1,4 +1,4 @@
-import type { UserRole } from "@/features/auth/auth.types";
+import type { FeaturePermission, UserRole } from "@/features/auth/auth.types";
 
 export interface AppUser {
   id: number;
@@ -6,4 +6,5 @@ export interface AppUser {
   name: string;
   role: UserRole;
   createdAt: string;
+  permissions: FeaturePermission[];
 }

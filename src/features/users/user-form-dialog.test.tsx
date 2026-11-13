@@ -30,6 +30,7 @@ const existing: AppUser = {
   name: "Ana Pérez",
   role: "GESTOR",
   createdAt: "2026-01-02",
+  permissions: [{ feature: "tickets", access: "EDIT" }],
 };
 
 function renderDialog(user?: AppUser | null) {
@@ -52,7 +53,7 @@ beforeEach(() => {
 });
 
 describe("UserFormDialog", () => {
-  it("crea un usuario con datos válidos", async () => {
+  it("crea un usuario con datos válidos y permisos", async () => {
     mockCreateUser.mockResolvedValue({ ...existing, id: 3, username: "nuevo" });
     const user = userEvent.setup();
     renderDialog();
@@ -60,6 +61,8 @@ describe("UserFormDialog", () => {
     await user.type(screen.getByLabelText("Usuario"), "nuevo");
     await user.type(screen.getByLabelText("Nombre"), "Nuevo Usuario");
     await user.type(screen.getByLabelText("Contraseña"), "ClaveSegura99!");
+    await user.click(screen.getByRole("combobox", { name: "Permiso para Tickets" }));
+    await user.click(await screen.findByRole("option", { name: "Ver y editar" }));
     await user.click(screen.getByRole("button", { name: "Crear usuario" }));
 
     await waitFor(() =>
@@ -68,8 +71,24 @@ describe("UserFormDialog", () => {
         name: "Nuevo Usuario",
         password: "ClaveSegura99!",
         role: "GESTOR",
+        permissions: [{ feature: "tickets", access: "EDIT" }],
       }),
     );
+  });
+
+  it("exige al menos una funcionalidad para usuarios no admin", async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.type(screen.getByLabelText("Usuario"), "nuevo");
+    await user.type(screen.getByLabelText("Nombre"), "Nuevo Usuario");
+    await user.type(screen.getByLabelText("Contraseña"), "ClaveSegura99!");
+    await user.click(screen.getByRole("button", { name: "Crear usuario" }));
+
+    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText("Asigná al menos una funcionalidad"),
+    ).toBeInTheDocument();
   });
 
   it("no envía la petición si la contraseña no cumple la política", async () => {
@@ -79,6 +98,8 @@ describe("UserFormDialog", () => {
     await user.type(screen.getByLabelText("Usuario"), "nuevo");
     await user.type(screen.getByLabelText("Nombre"), "Nuevo Usuario");
     await user.type(screen.getByLabelText("Contraseña"), "corta");
+    await user.click(screen.getByRole("combobox", { name: "Permiso para Tickets" }));
+    await user.click(await screen.findByRole("option", { name: "Ver" }));
     await user.click(screen.getByRole("button", { name: "Crear usuario" }));
 
     expect(mockCreateUser).not.toHaveBeenCalled();
@@ -94,6 +115,8 @@ describe("UserFormDialog", () => {
     await user.type(screen.getByLabelText("Usuario"), "con espacio");
     await user.type(screen.getByLabelText("Nombre"), "Nombre");
     await user.type(screen.getByLabelText("Contraseña"), "ClaveSegura99!");
+    await user.click(screen.getByRole("combobox", { name: "Permiso para Tickets" }));
+    await user.click(await screen.findByRole("option", { name: "Ver" }));
     await user.click(screen.getByRole("button", { name: "Crear usuario" }));
 
     expect(mockCreateUser).not.toHaveBeenCalled();
@@ -104,12 +127,13 @@ describe("UserFormDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("en edición, no exige contraseña y solo la cambia si se escribe una válida", async () => {
+  it("en edición, no exige contraseña y envía los permisos actuales", async () => {
     mockUpdateUser.mockResolvedValue(existing);
     const user = userEvent.setup();
     renderDialog(existing);
 
-    await user.type(screen.getByLabelText("Nombre"), " editado");
+    await user.clear(screen.getByLabelText("Nombre"));
+    await user.type(screen.getByLabelText("Nombre"), "Ana Pérez editado");
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
 
     await waitFor(() =>
@@ -117,6 +141,7 @@ describe("UserFormDialog", () => {
         username: "ana",
         name: "Ana Pérez editado",
         role: "GESTOR",
+        permissions: [{ feature: "tickets", access: "EDIT" }],
       }),
     );
   });

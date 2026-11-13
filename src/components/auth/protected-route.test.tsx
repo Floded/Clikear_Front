@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -19,15 +20,20 @@ function LoginStub() {
 }
 
 function renderProtectedApp() {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   return render(
-    <MemoryRouter initialEntries={["/tickets"]}>
-      <Routes>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/tickets" element={<div>Panel de tickets</div>} />
-        </Route>
-        <Route path="/login" element={<LoginStub />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={client}>
+      <MemoryRouter initialEntries={["/tickets"]}>
+        <Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/tickets" element={<div>Panel de tickets</div>} />
+          </Route>
+          <Route path="/login" element={<LoginStub />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
@@ -65,7 +71,13 @@ describe("ProtectedRoute", () => {
 
   it("renders the protected outlet when there is a session", () => {
     mockSession({
-      data: { id: 1, username: "admin", name: "Admin", role: "ADMIN" },
+      data: {
+        id: 1,
+        username: "admin",
+        name: "Admin",
+        role: "ADMIN",
+        permissions: [],
+      },
     });
 
     renderProtectedApp();

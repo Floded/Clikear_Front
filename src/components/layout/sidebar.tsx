@@ -8,16 +8,18 @@ import { logout } from "@/features/auth/auth.api";
 import { sessionQueryKey, useSession } from "@/features/auth/use-session";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+import { canView } from "@/lib/permissions";
+import type { FeatureKey } from "@/features/auth/auth.types";
 import { HealthStatus } from "./health-status";
 import { ModeToggle } from "./mode-toggle";
 import { Moon, Sun } from "lucide-react";
 
-const navigationOptions = [
-  { to: "/tickets", label: "Tickets", icon: ClipboardList },
-  { to: "/organization", label: "Organización", icon: Users },
-  { to: "/inventory", label: "Inventario", icon: Boxes },
-  { to: "/budgets", label: "Presupuestos", icon: Calculator },
-  { to: "/invoices", label: "Facturación", icon: ReceiptText },
+const navigationOptions: { to: string; label: string; icon: typeof ClipboardList; feature: FeatureKey }[] = [
+  { to: "/tickets", label: "Tickets", icon: ClipboardList, feature: "tickets" },
+  { to: "/organization", label: "Organización", icon: Users, feature: "organization" },
+  { to: "/inventory", label: "Inventario", icon: Boxes, feature: "inventory" },
+  { to: "/budgets", label: "Presupuestos", icon: Calculator, feature: "budgets" },
+  { to: "/invoices", label: "Facturación", icon: ReceiptText, feature: "invoices" },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -50,6 +52,8 @@ export function Sidebar() {
     },
   });
 
+  const visibleOptions = navigationOptions.filter((opt) => canView(user, opt.feature));
+
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
       <div className="flex items-center gap-2 border-b px-5 py-4">
@@ -58,7 +62,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 p-3">
-        {navigationOptions.map(({ to, label, icon: Icon }) => (
+        {visibleOptions.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

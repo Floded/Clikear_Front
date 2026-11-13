@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import type { AccessMode, FeatureKey, FeaturePermission } from "@/features/auth/auth.types";
+import { FEATURES, getAccess } from "@/lib/permissions";
 import { createUser, updateUser } from "./users.api";
 import type { AppUser } from "./users.types";
 
@@ -38,6 +40,33 @@ interface FormValues {
 }
 
 const EMPTY_FORM: FormValues = { username: "", name: "", password: "", role: "GESTOR" };
+
+type PermissionState = Record<FeatureKey, "NONE" | AccessMode>;
+
+function emptyPermissions(): PermissionState {
+  return {
+    tickets: "NONE",
+    organization: "NONE",
+    inventory: "NONE",
+    budgets: "NONE",
+    invoices: "NONE",
+  };
+}
+
+function permissionsFromUser(user?: AppUser | null): PermissionState {
+  const base = emptyPermissions();
+  if (!user) return base;
+  for (const feature of FEATURES) {
+    base[feature.key] = getAccess(user.permissions, feature.key);
+  }
+  return base;
+}
+
+function toPermissionList(state: PermissionState): FeaturePermission[] {
+  return FEATURES.flatMap(({ key }) =>
+    state[key] === "NONE" ? [] : [{ feature: key, access: state[key] as AccessMode }],
+  );
+}
 
 // Misma política que el backend (user.dto.ts) para dar feedback antes de enviar
 const usernameSchema = z
@@ -78,7 +107,8 @@ export function UserFormDialog({
   const isEdit = user != null;
 
   const [formValues, setFormValues] = useState<FormValues>(EMPTY_FORM);
-  const [errors, setErrors] = useState<Partial<FormValues>>({});
+  const [permissions, setPermissions] = useState<PermissionState>(emptyPermissions);
+  const [errors, setErrors] = useState<Partial<FormValues> & { permissions?: string }>({});
 
   useEffect(() => {
     if (!open) return;
@@ -87,11 +117,12 @@ export function UserFormDialog({
         ? { username: user.username, name: user.name, password: "", role: user.role }
         : EMPTY_FORM,
     );
+    setPermissions(permissionsFromUser(user));
     setErrors({});
   }, [open, user]);
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) =>
+    mutationFn: (values: FormValues & { permissions: FeaturePermission[] }) =>
       isEdit
         ? updateUser(user.id, {
             username: values.username,
@@ -99,6 +130,7 @@ export function UserFormDialog({
             // Solo se envía la contraseña si se quiere cambiar
             ...(values.password && { password: values.password }),
             role: values.role,
+            permissions: values.permissions,
           })
         : createUser(values),
     onSuccess: () => {
@@ -116,16 +148,21 @@ export function UserFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const { username, name, password } = formValues;
+    const { username, name, password, role } = formValues;
+    const permissionList = role === "ADMIN" ? [] : toPermissionList(permissions);
 
     // Validación en vivo con los mismos criterios del backend
-    const nextErrors: Partial<FormValues> = {
+    const nextErrors: Partial<FormValues> & { permissions?: string } = {
       username: firstZodMessage(usernameSchema, username) ?? undefined,
       name: name.trim().length < 2 ? "El nombre es obligatorio" : undefined,
       password: password ? firstZodMessage(passwordSchema, password) ?? undefined : undefined,
+      permissions:
+        role !== "ADMIN" && permissionList.length === 0
+          ? "Asigná al menos una funcionalidad"
+          : undefined,
     };
     setErrors(nextErrors);
-    if (nextErrors.username || nextErrors.name || nextErrors.password) {
+    if (nextErrors.username || nextErrors.name || nextErrors.password || nextErrors.permissions) {
       return;
     }
 
@@ -133,13 +170,14 @@ export function UserFormDialog({
       username: username.trim().toLowerCase(),
       name: name.trim(),
       password,
-      role: formValues.role,
+      role,
+      permissions: permissionList,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar usuario" : "Nuevo usuario"}</DialogTitle>
         </DialogHeader>
@@ -192,6 +230,47 @@ export function UserFormDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {formValues.role === "ADMIN" ? (
+            <p className="text-sm text-muted-foreground">
+              El administrador tiene acceso total a todas las funcionalidades.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              <Label>Funcionalidades</Label>
+              <p className="text-xs text-muted-foreground">
+                Elegí qué puede ver o editar este usuario.
+              </p>
+              <div className="space-y-2 rounded-md border p-3">
+                {FEATURES.map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between gap-3">
+                    <span className="text-sm">{label}</span>
+                    <Select
+                      value={permissions[key]}
+                      onValueChange={(value) =>
+                        setPermissions((prev) => ({
+                          ...prev,
+                          [key]: value as PermissionState[FeatureKey],
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="w-40" aria-label={`Permiso para ${label}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NONE">Sin acceso</SelectItem>
+                        <SelectItem value="VIEW">Ver</SelectItem>
+                        <SelectItem value="EDIT">Ver y editar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+              {errors.permissions && (
+                <p className="text-xs text-destructive">{errors.permissions}</p>
+              )}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="user-password">
