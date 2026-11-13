@@ -25,4 +25,5 @@
 
 ### Fase 5 ⬜ Exportaciones
 - [x] Exportar a Excel los tickets y las asignaciones de inventario. → botones "Exportar Excel" (tickets respeta filtros activos) + `lib/download.ts`.
-- [x] Rango de fechas (Desde / Hasta) en ambas exportaciones: tickets por fecha de apertura, asignaciones por fecha de entrega. → `dateRangeToParams` envía ISO de inicio/fin de día; sin fechas = exporta todo. Mergeado a `dev`.
+- [x] Rango de fechas (Desde / Hasta) en ambas exportaciones: tickets por fecha de apertura, asignaciones por fecha de entrega. → `dateRangeToParams` envía ISO de inicio/fin de día; sin fechas = exporta todo.
+- [x] Modal de exportación con rango de fechas. → `ExportExcelDialog` reutilizable; el botón "Exportar Excel" abre el modal en Tickets y en Custodia. Mergeado a `dev`.
