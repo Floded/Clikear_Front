@@ -65,7 +65,7 @@ describe("ProtectedRoute", () => {
 
   it("renders the protected outlet when there is a session", () => {
     mockSession({
-      data: { id: 1, email: "admin@clickear.local", name: "Admin" },
+      data: { id: 1, username: "admin", name: "Admin", role: "ADMIN" },
     });
 
     renderProtectedApp();

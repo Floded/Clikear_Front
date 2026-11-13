@@ -27,3 +27,8 @@
 - [x] Exportar a Excel los tickets y las asignaciones de inventario. → botones "Exportar Excel" (tickets respeta filtros activos) + `lib/download.ts`.
 - [x] Rango de fechas (Desde / Hasta) en ambas exportaciones: tickets por fecha de apertura, asignaciones por fecha de entrega. → `dateRangeToParams` envía ISO de inicio/fin de día; sin fechas = exporta todo.
 - [x] Modal de exportación con rango de fechas. → `ExportExcelDialog` reutilizable; el botón "Exportar Excel" abre el modal en Tickets y en Custodia. Mergeado a `dev`.
+
+### Fase 6 ⬜ Login por usuario y gestión de roles
+- [ ] Login con username (campo "Usuario" en vez de "Email"); `SessionUser` con `username` y `role`.
+- [ ] Sidebar: mostrar username y rol; link "Usuarios" visible solo para ADMIN.
+- [ ] Página "Usuarios": tabla + diálogo de alta/edición (username, nombre, rol, contraseña) y baja.

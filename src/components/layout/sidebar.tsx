@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Boxes, Calculator, ClipboardList, LogOut, ReceiptText, Users } from "lucide-react";
+import { Boxes, Calculator, ClipboardList, LogOut, ReceiptText, UserCog, Users } from "lucide-react";
 
 import { cn } from "cn";
 import logoUrl from "@/assets/logo.png";
@@ -19,6 +19,12 @@ const navigationOptions = [
   { to: "/budgets", label: "Presupuestos", icon: Calculator },
   { to: "/invoices", label: "Facturación", icon: ReceiptText },
 ];
+
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Administrador",
+  GESTOR: "Gestor",
+  REVISADOR: "Revisador",
+};
 
 export function Sidebar() {
   const { data: user } = useSession();
@@ -69,6 +75,24 @@ export function Sidebar() {
             {label}
           </NavLink>
         ))}
+
+        {/* Gestión de usuarios: solo para administradores */}
+        {user?.role === "ADMIN" && (
+          <NavLink
+            to="/usuarios"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                isActive
+                  ? "bg-accent font-medium text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+              )
+            }
+          >
+            <UserCog className="size-4" aria-hidden />
+            Usuarios
+          </NavLink>
+        )}
       </nav>
 
       <div className="flex flex-col gap-3 border-t p-3">
@@ -92,7 +116,9 @@ export function Sidebar() {
         <div className="flex items-center gap-2 px-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{user?.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user ? `${user.username} · ${ROLE_LABELS[user.role] ?? user.role}` : ""}
+            </p>
           </div>
           <Button
             variant="ghost"

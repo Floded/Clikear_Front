@@ -1,5 +1,8 @@
+export type UserRole = "ADMIN" | "GESTOR" | "REVISADOR";
+
 export interface SessionUser {
   id: number;
-  email: string;
+  username: string;
   name: string;
+  role: UserRole;
 }

@@ -12,6 +12,7 @@ import { SuppliersPage } from './pages/inventory/suppliers-page'
 import { TicketsPage } from './pages/tickets/tickets-page'
 import { BudgetsPage } from './pages/budgets/budgets-page'
 import { OrganizationPage } from './pages/organization/organization-page'
+import { UsersPage } from './pages/users/users-page'
 import { LoginPage } from './pages/login-page'
 import './index.css'
 
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/inventory/suppliers" element={<SuppliersPage />} />
                 <Route path="/invoices" element={<InvoicesPage />} />
                 <Route path="/budgets" element={<BudgetsPage />} />
+                <Route path="/usuarios" element={<UsersPage />} />
                 <Route
                   path="*"
                   element={<Navigate to="/tickets" replace />}

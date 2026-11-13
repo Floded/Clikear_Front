@@ -48,7 +48,7 @@ beforeEach(() => {
   mockLogout.mockResolvedValue(undefined);
   mockUseSession.mockReturnValue({
     isPending: false,
-    data: { id: 1, email: "ana@clickear.com", name: "Ana Pérez" },
+    data: { id: 1, username: "ana", name: "Ana Pérez", role: "GESTOR" },
   } as SessionResult);
 });
 
@@ -79,7 +79,7 @@ describe("Sidebar", () => {
     renderSidebar();
 
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
-    expect(screen.getByText("ana@clickear.com")).toBeInTheDocument();
+    expect(screen.getByText("ana · Gestor")).toBeInTheDocument();
   });
 
   it("logs out, clears the session cache and navigates to /login", async () => {

@@ -22,13 +22,16 @@ import { login } from "@/features/auth/auth.api";
 import { sessionQueryKey } from "@/features/auth/use-session";
 
 const loginSchema = z.object({
-  email: z.string().trim().email({ message: "Email inválido" }),
+  username: z
+    .string()
+    .trim()
+    .min(3, { message: "El usuario debe tener al menos 3 caracteres" }),
   password: z.string().min(1, { message: "La contraseña es obligatoria" }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const defaultValues: LoginFormValues = { email: "", password: "" };
+const defaultValues: LoginFormValues = { username: "", password: "" };
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -43,7 +46,7 @@ export function LoginPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: LoginFormValues) => login(values.email, values.password),
+    mutationFn: (values: LoginFormValues) => login(values.username, values.password),
     onSuccess: (user) => {
       queryClient.setQueryData(sessionQueryKey, user);
       navigate(from, { replace: true });
@@ -76,17 +79,17 @@ export function LoginPage() {
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Usuario</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="admin@clickear.local"
-                {...form.register("email")}
+                id="username"
+                type="text"
+                autoComplete="username"
+                placeholder="admin"
+                {...form.register("username")}
               />
-              {form.formState.errors.email && (
+              {form.formState.errors.username && (
                 <p className="text-xs text-destructive">
-                  {form.formState.errors.email.message}
+                  {form.formState.errors.username.message}
                 </p>
               )}
             </div>
