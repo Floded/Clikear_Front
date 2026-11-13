@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExportExcelDialog } from "@/components/shared/export-excel-dialog";
 
+import { useSession } from "@/features/auth/use-session";
+import { canEdit } from "@/lib/permissions";
 import { fetchEmployees } from "@/features/organization/organization.api";
 import {
   exportTicketsExcel,
@@ -29,6 +31,9 @@ const EMPTY_FILTERS: TicketFiltersState = {
 };
 
 export function TicketsPage() {
+  const { data: sessionUser } = useSession();
+  const canEditTickets = canEdit(sessionUser, "tickets");
+
   const [filters, setFilters] = useState<TicketFiltersState>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
@@ -126,7 +131,9 @@ export function TicketsPage() {
             <Download className="size-4" aria-hidden />
             Exportar Excel
           </Button>
-          <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
+          {canEditTickets && (
+            <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
+          )}
         </div>
       </div>
 

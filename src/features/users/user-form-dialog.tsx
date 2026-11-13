@@ -68,6 +68,17 @@ function toPermissionList(state: PermissionState): FeaturePermission[] {
   );
 }
 
+function setAllPermissions(
+  setPermissions: React.Dispatch<React.SetStateAction<PermissionState>>,
+  setErrors: React.Dispatch<React.SetStateAction<Partial<FormValues> & { permissions?: string }>>,
+  access: "VIEW" | "EDIT",
+) {
+  setPermissions(
+    Object.fromEntries(FEATURES.map(({ key }) => [key, access])) as PermissionState,
+  );
+  setErrors((prev) => ({ ...prev, permissions: undefined }));
+}
+
 // Misma política que el backend (user.dto.ts) para dar feedback antes de enviar
 const usernameSchema = z
   .string()
@@ -237,10 +248,32 @@ export function UserFormDialog({
             </p>
           ) : (
             <div className="space-y-2">
-              <Label>Funcionalidades</Label>
-              <p className="text-xs text-muted-foreground">
-                Elegí qué puede ver o editar este usuario.
-              </p>
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <div className="space-y-1">
+                  <Label>Funcionalidades</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Elegí qué puede ver o editar este usuario.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAllPermissions(setPermissions, setErrors, "VIEW")}
+                  >
+                    Todo en lectura
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAllPermissions(setPermissions, setErrors, "EDIT")}
+                  >
+                    Todo en edición
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2 rounded-md border p-3">
                 {FEATURES.map(({ key, label }) => (
                   <div key={key} className="flex items-center justify-between gap-3">

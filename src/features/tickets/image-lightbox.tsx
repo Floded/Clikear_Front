@@ -65,77 +65,77 @@ export function ImageLightbox({ images, index, onIndexChange }: ImageLightboxPro
 
   return (
     <Dialog open onOpenChange={(o) => !o && onIndexChange(null)}>
-      {/* Cubre toda la pantalla por encima del dialog de detalle del ticket */}
+      {/* Modal proporcionado a la pantalla (no fullscreen) */}
       <DialogContent
         showCloseButton={false}
-        className="max-w-none! sm:max-w-none! w-screen! h-screen! max-h-screen! rounded-none! bg-black/90! ring-0! p-0! gap-0! overflow-hidden"
+        className="flex h-auto max-h-[88vh] w-[min(94vw,72rem)] max-w-[94vw]! flex-col gap-0 overflow-hidden rounded-xl bg-black/95 p-0 text-white ring-1 ring-white/10 sm:max-w-[min(94vw,72rem)]!"
       >
         <DialogTitle className="sr-only">Imagen de cierre</DialogTitle>
         <DialogDescription className="sr-only">
           Vista ampliada de la imagen de cierre del ticket
         </DialogDescription>
 
-        <div className="flex h-full flex-col">
-          <header className="flex items-center justify-between gap-4 p-4 text-white">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{current.fileName}</p>
-              <p className="text-xs text-white/70">
-                {index! + 1} / {images.length}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="icon"
-                disabled={downloading}
-                onClick={() => downloadImage(current)}
-              >
-                <Download className="h-4 w-4" />
-                <span className="sr-only">Descargar imagen</span>
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                autoFocus
-                onClick={() => onIndexChange(null)}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Cerrar imagen ampliada</span>
-              </Button>
-            </div>
-          </header>
-
-          <div className="flex min-h-0 flex-1 items-center justify-center gap-2 px-4 pb-4">
-            {hasMultiple && (
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={() =>
-                  onIndexChange((index! - 1 + images.length) % images.length)
-                }
-              >
-                <ChevronLeft className="h-6 w-6" />
-                <span className="sr-only">Imagen anterior</span>
-              </Button>
-            )}
-
-            <img
-              src={ticketImageUrl(current.fileName)}
-              alt={current.fileName}
-              className="max-h-full max-w-full object-contain"
-            />
-
-            {hasMultiple && (
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={() => onIndexChange((index! + 1) % images.length)}
-              >
-                <ChevronRight className="h-6 w-6" />
-                <span className="sr-only">Imagen siguiente</span>
-              </Button>
-            )}
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 p-4">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{current.fileName}</p>
+            <p className="text-xs text-white/70">
+              {index! + 1} / {images.length}
+            </p>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="icon"
+              disabled={downloading}
+              onClick={() => downloadImage(current)}
+            >
+              <Download className="h-4 w-4" />
+              <span className="sr-only">Descargar imagen</span>
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              autoFocus
+              onClick={() => onIndexChange(null)}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Cerrar imagen ampliada</span>
+            </Button>
+          </div>
+        </header>
+
+        <div className="flex min-h-0 flex-1 items-center justify-center gap-2 p-4">
+          {hasMultiple && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="shrink-0"
+              onClick={() =>
+                onIndexChange((index! - 1 + images.length) % images.length)
+              }
+            >
+              <ChevronLeft className="h-6 w-6" />
+              <span className="sr-only">Imagen anterior</span>
+            </Button>
+          )}
+
+          <img
+            src={ticketImageUrl(current.fileName)}
+            alt={current.fileName}
+            className="max-h-full max-w-full object-contain"
+          />
+
+          {hasMultiple && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="shrink-0"
+              onClick={() => onIndexChange((index! + 1) % images.length)}
+            >
+              <ChevronRight className="h-6 w-6" />
+              <span className="sr-only">Imagen siguiente</span>
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
