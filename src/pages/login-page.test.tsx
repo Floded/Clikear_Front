@@ -26,8 +26,9 @@ const mockToastError = vi.mocked(toast.error);
 
 const sessionUser: SessionUser = {
   id: 1,
-  email: "admin@clickear.local",
+  username: "admin",
   name: "Admin",
+  role: "ADMIN",
 };
 
 function renderLogin(from?: string) {
@@ -67,31 +68,28 @@ beforeEach(() => {
 });
 
 describe("LoginPage", () => {
-  it("shows errors for empty email and password", async () => {
+  it("shows errors for empty username and password", async () => {
     const user = userEvent.setup();
     renderLogin();
 
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 
-    expect(await screen.findByText("Email inválido")).toBeInTheDocument();
+    expect(await screen.findByText("El usuario debe tener al menos 3 caracteres")).toBeInTheDocument();
     expect(
       await screen.findByText("La contraseña es obligatoria"),
     ).toBeInTheDocument();
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
-  it("rejects a malformed email through the Zod schema", async () => {
+  it("rejects a too-short username through the Zod schema", async () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.type(screen.getByLabelText("Email"), "no-es-email");
+    await user.type(screen.getByLabelText("Usuario"), "ab");
     await user.type(screen.getByLabelText("Contraseña"), "secret1");
-
-    // jsdom bloquea el submit nativo con type=email inválido; se dispara el
-    // evento directo para ejercitar la validación Zod
     submitForm();
 
-    expect(await screen.findByText("Email inválido")).toBeInTheDocument();
+    expect(await screen.findByText("El usuario debe tener al menos 3 caracteres")).toBeInTheDocument();
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
@@ -99,13 +97,13 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     const { client } = renderLogin("/inventory");
 
-    await user.type(screen.getByLabelText("Email"), "admin@clickear.local");
+    await user.type(screen.getByLabelText("Usuario"), "admin");
     await user.type(screen.getByLabelText("Contraseña"), "Admin123!");
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 
     await waitFor(() =>
       expect(mockLogin).toHaveBeenCalledWith(
-        "admin@clickear.local",
+        "admin",
         "Admin123!",
       ),
     );
@@ -117,7 +115,7 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.type(screen.getByLabelText("Email"), "admin@clickear.local");
+    await user.type(screen.getByLabelText("Usuario"), "admin");
     await user.type(screen.getByLabelText("Contraseña"), "Admin123!");
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 
@@ -131,7 +129,7 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.type(screen.getByLabelText("Email"), "admin@clickear.local");
+    await user.type(screen.getByLabelText("Usuario"), "admin");
     await user.type(screen.getByLabelText("Contraseña"), "otra-clave");
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 

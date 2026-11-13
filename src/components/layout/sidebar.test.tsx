@@ -43,12 +43,26 @@ function renderSidebar() {
   return { client };
 }
 
+const ALL_PERMISSIONS = [
+  { feature: "tickets", access: "EDIT" },
+  { feature: "organization", access: "EDIT" },
+  { feature: "inventory", access: "EDIT" },
+  { feature: "budgets", access: "EDIT" },
+  { feature: "invoices", access: "EDIT" },
+] as const;
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockLogout.mockResolvedValue(undefined);
   mockUseSession.mockReturnValue({
     isPending: false,
-    data: { id: 1, email: "ana@clickear.com", name: "Ana Pérez" },
+    data: {
+      id: 1,
+      username: "ana",
+      name: "Ana Pérez",
+      role: "GESTOR",
+      permissions: [...ALL_PERMISSIONS],
+    },
   } as SessionResult);
 });
 
@@ -79,7 +93,7 @@ describe("Sidebar", () => {
     renderSidebar();
 
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
-    expect(screen.getByText("ana@clickear.com")).toBeInTheDocument();
+    expect(screen.getByText("ana · Gestor")).toBeInTheDocument();
   });
 
   it("logs out, clears the session cache and navigates to /login", async () => {
@@ -105,5 +119,24 @@ describe("Sidebar", () => {
     await waitFor(() =>
       expect(screen.getByText("Pantalla de login")).toBeInTheDocument(),
     );
+  });
+
+  it("solo muestra las funcionalidades permitidas", () => {
+    mockUseSession.mockReturnValue({
+      isPending: false,
+      data: {
+        id: 2,
+        username: "rev",
+        name: "Revisor",
+        role: "REVISADOR",
+        permissions: [{ feature: "tickets", access: "VIEW" }],
+      },
+    } as SessionResult);
+    renderSidebar();
+
+    expect(screen.getByRole("link", { name: "Tickets" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Organización" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Inventario" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Usuarios" })).not.toBeInTheDocument();
   });
 });

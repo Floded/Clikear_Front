@@ -15,7 +15,7 @@ const mockFetchSession = vi.mocked(fetchSession);
 
 const sessionUser: SessionUser = {
   id: 1,
-  email: "ana@clickear.com",
+  username: "ana",
   name: "Ana Pérez",
 };
 

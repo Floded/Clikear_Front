@@ -12,7 +12,10 @@ import { SuppliersPage } from './pages/inventory/suppliers-page'
 import { TicketsPage } from './pages/tickets/tickets-page'
 import { BudgetsPage } from './pages/budgets/budgets-page'
 import { OrganizationPage } from './pages/organization/organization-page'
+import { UsersPage } from './pages/users/users-page'
 import { LoginPage } from './pages/login-page'
+import { useSession } from '@/features/auth/use-session'
+import { getFirstAllowedPath } from '@/lib/permissions'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -24,6 +27,11 @@ const queryClient = new QueryClient({
   },
 })
 
+function IndexRedirect() {
+  const { data: user } = useSession()
+  return <Navigate to={getFirstAllowedPath(user) ?? '/login'} replace />
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider attribute="class">
@@ -33,17 +41,27 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/login" element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Navigate to="/tickets" replace />} />
-                <Route path="/tickets" element={<TicketsPage />} />
-                <Route path="/organization" element={<OrganizationPage />} />
-                <Route path="/inventory" element={<InventoryPage />} />
-                <Route path="/inventory/suppliers" element={<SuppliersPage />} />
-                <Route path="/invoices" element={<InvoicesPage />} />
-                <Route path="/budgets" element={<BudgetsPage />} />
-                <Route
-                  path="*"
-                  element={<Navigate to="/tickets" replace />}
-                />
+                <Route path="/" element={<IndexRedirect />} />
+                <Route element={<ProtectedRoute feature="tickets" />}>
+                  <Route path="/tickets" element={<TicketsPage />} />
+                </Route>
+                <Route element={<ProtectedRoute feature="organization" />}>
+                  <Route path="/organization" element={<OrganizationPage />} />
+                </Route>
+                <Route element={<ProtectedRoute feature="inventory" />}>
+                  <Route path="/inventory" element={<InventoryPage />} />
+                  <Route path="/inventory/suppliers" element={<SuppliersPage />} />
+                </Route>
+                <Route element={<ProtectedRoute feature="budgets" />}>
+                  <Route path="/budgets" element={<BudgetsPage />} />
+                </Route>
+                <Route element={<ProtectedRoute feature="invoices" />}>
+                  <Route path="/invoices" element={<InvoicesPage />} />
+                </Route>
+                <Route element={<ProtectedRoute adminOnly />}>
+                  <Route path="/usuarios" element={<UsersPage />} />
+                </Route>
+                <Route path="*" element={<IndexRedirect />} />
               </Route>
             </Route>
           </Routes>

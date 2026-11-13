@@ -13,7 +13,7 @@ vi.mock("@/lib/api", () => ({
 const mockGet = vi.mocked(api.get);
 const mockPost = vi.mocked(api.post);
 
-const user = { id: 1, email: "ana@clickear.com", name: "Ana Pérez" };
+const user = { id: 1, username: "ana", name: "Ana Pérez", role: "GESTOR" };
 
 function axiosError(status: number) {
   return { isAxiosError: true, response: { status } };
@@ -27,9 +27,9 @@ describe("auth.api", () => {
   it("login returns the session user", async () => {
     mockPost.mockResolvedValue({ data: { user } });
 
-    await expect(login("ana@clickear.com", "secret")).resolves.toEqual(user);
+    await expect(login("ana", "secret")).resolves.toEqual(user);
     expect(mockPost).toHaveBeenCalledWith("/auth/login", {
-      email: "ana@clickear.com",
+      username: "ana",
       password: "secret",
     });
   });

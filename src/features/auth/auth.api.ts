@@ -4,9 +4,9 @@ import { api } from "@/lib/api";
 
 import type { SessionUser } from "./auth.types";
 
-export async function login(email: string, password: string): Promise<SessionUser> {
+export async function login(username: string, password: string): Promise<SessionUser> {
   const { data } = await api.post<{ user: SessionUser }>("/auth/login", {
-    email,
+    username,
     password,
   });
   return data.user;
