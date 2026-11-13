@@ -21,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { useSession } from "@/features/auth/use-session";
+import { canEdit } from "@/lib/permissions";
 import { fetchEmployees } from "@/features/organization/organization.api";
 import {
   assignTicket,
@@ -44,6 +46,8 @@ interface TicketDetailDialogProps {
 
 export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetailDialogProps) {
   const queryClient = useQueryClient();
+  const { data: sessionUser } = useSession();
+  const canEditTickets = canEdit(sessionUser, "tickets");
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -156,30 +160,32 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
               </section>
             )}
 
-            <section className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold">Cambiar estado</h3>
-                <div className="flex items-center gap-2">
-                  <StatusSelect
-                    currentStatus={(data.status as TicketStatus) ?? "ABIERTO"}
-                    disabled={mutation.isPending}
-                    onSelect={(next) => mutation.mutate(next)}
-                  />
-                  {/* El cierre es una acción explícita que exige evidencia */}
-                  {data.status !== "TERMINADO" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
+            {canEditTickets && (
+              <section className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold">Cambiar estado</h3>
+                  <div className="flex items-center gap-2">
+                    <StatusSelect
+                      currentStatus={(data.status as TicketStatus) ?? "ABIERTO"}
                       disabled={mutation.isPending}
-                      onClick={() => setCloseDialogOpen(true)}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      Finalizar ticket
-                    </Button>
-                  )}
+                      onSelect={(next) => mutation.mutate(next)}
+                    />
+                    {/* El cierre es una acción explícita que exige evidencia */}
+                    {data.status !== "TERMINADO" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={mutation.isPending}
+                        onClick={() => setCloseDialogOpen(true)}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Finalizar ticket
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Asignación a empleado (seguimiento) */}
             <section className="space-y-3">
@@ -192,37 +198,39 @@ export function TicketDetailDialog({ ticketId, open, onOpenChange }: TicketDetai
                       : "Sin asignar"}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Select
-                    value={data.assignedEmployee ? String(data.assignedEmployee.id) : "none"}
-                    onValueChange={(v) =>
-                      assignmentMutation.mutate(v === "none" ? null : Number(v))
-                    }
-                    disabled={assignmentMutation.isPending}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Asignar a…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin asignar</SelectItem>
-                      {(employeesQuery.data?.data ?? []).map((e) => (
-                        <SelectItem key={e.id} value={String(e.id)}>
-                          {e.fullName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {data.assignedEmployee && (
-                    <Button
-                      variant="outline"
-                      size="sm"
+                {canEditTickets && (
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={data.assignedEmployee ? String(data.assignedEmployee.id) : "none"}
+                      onValueChange={(v) =>
+                        assignmentMutation.mutate(v === "none" ? null : Number(v))
+                      }
                       disabled={assignmentMutation.isPending}
-                      onClick={() => assignmentMutation.mutate(null)}
                     >
-                      Liberar
-                    </Button>
-                  )}
-                </div>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Asignar a…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin asignar</SelectItem>
+                        {(employeesQuery.data?.data ?? []).map((e) => (
+                          <SelectItem key={e.id} value={String(e.id)}>
+                            {e.fullName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {data.assignedEmployee && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={assignmentMutation.isPending}
+                        onClick={() => assignmentMutation.mutate(null)}
+                      >
+                        Liberar
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {(data.assignments?.length ?? 0) > 0 && (

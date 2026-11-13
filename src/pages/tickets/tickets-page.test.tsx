@@ -10,6 +10,7 @@ import {
   fetchTechnicians,
 } from "@/features/tickets/tickets.api";
 import { fetchEmployees } from "@/features/organization/organization.api";
+import { useSession } from "@/features/auth/use-session";
 import { toast } from "sonner";
 import type { TicketListItem, Paginated, Technician } from "@/features/tickets/tickets.types";
 import type { Employee } from "@/features/organization/organization.types";
@@ -22,6 +23,10 @@ vi.mock("@/features/tickets/tickets.api", () => ({
 
 vi.mock("@/features/organization/organization.api", () => ({
   fetchEmployees: vi.fn(),
+}));
+
+vi.mock("@/features/auth/use-session", () => ({
+  useSession: vi.fn(),
 }));
 
 vi.mock("sonner", () => ({
@@ -45,6 +50,7 @@ const mockFetchTickets = vi.mocked(fetchTickets);
 const mockFetchTechnicians = vi.mocked(fetchTechnicians);
 const mockFetchEmployees = vi.mocked(fetchEmployees);
 const mockExportTicketsExcel = vi.mocked(exportTicketsExcel);
+const mockUseSession = vi.mocked(useSession);
 const mockToastSuccess = vi.mocked(toast.success);
 const mockToastError = vi.mocked(toast.error);
 
@@ -85,6 +91,15 @@ function renderTicketsPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockUseSession.mockReturnValue({
+    data: {
+      id: 1,
+      username: "admin",
+      name: "Admin",
+      role: "ADMIN",
+      permissions: [],
+    },
+  } as unknown as ReturnType<typeof useSession>);
   mockFetchTickets.mockResolvedValue(ticketsPage([ticket]));
   mockFetchTechnicians.mockResolvedValue(emptyPaginated<Technician>());
   mockFetchEmployees.mockResolvedValue(emptyPaginated<Employee>());

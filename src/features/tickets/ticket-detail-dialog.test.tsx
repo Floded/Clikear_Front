@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { fetchEmployees } from "@/features/organization/organization.api";
 import { CloseTicketDialog } from "@/features/tickets/close-ticket-dialog";
 import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog";
+import { useSession } from "@/features/auth/use-session";
 import {
   assignTicket,
   fetchTicketDetail,
@@ -29,6 +30,10 @@ vi.mock("@/features/organization/organization.api", () => ({
   fetchEmployees: vi.fn(),
 }));
 
+vi.mock("@/features/auth/use-session", () => ({
+  useSession: vi.fn(),
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -41,6 +46,7 @@ const mockUpdateTicketStatus = vi.mocked(updateTicketStatus);
 const mockAssignTicket = vi.mocked(assignTicket);
 const mockFetchEmployees = vi.mocked(fetchEmployees);
 const mockFetchTicketImages = vi.mocked(fetchTicketImages);
+const mockUseSession = vi.mocked(useSession);
 const mockToastSuccess = vi.mocked(toast.success);
 const mockToastError = vi.mocked(toast.error);
 
@@ -88,6 +94,15 @@ function renderDialog(onOpenChange = vi.fn()) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockUseSession.mockReturnValue({
+    data: {
+      id: 1,
+      username: "admin",
+      name: "Admin",
+      role: "ADMIN",
+      permissions: [],
+    },
+  } as unknown as ReturnType<typeof useSession>);
   mockFetchTicketDetail.mockResolvedValue(ticketDetail);
   mockFetchTicketImages.mockResolvedValue([]);
   mockUpdateTicketStatus.mockResolvedValue({
