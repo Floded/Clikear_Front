@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -38,6 +39,32 @@ interface FormValues {
 
 const EMPTY_FORM: FormValues = { username: "", name: "", password: "", role: "GESTOR" };
 
+// Misma política que el backend (user.dto.ts) para dar feedback antes de enviar
+const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, "El usuario debe tener al menos 3 caracteres")
+  .max(50, "El usuario no puede superar 50 caracteres")
+  .regex(
+    /^[a-z0-9._-]+$/,
+    "Solo admite letras, números, punto, guion y guion bajo (sin espacios)",
+  );
+
+const passwordSchema = z
+  .string()
+  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .max(200, "La contraseña es muy larga")
+  .regex(/[A-Z]/, "Debe contener al menos una mayúscula")
+  .regex(/[a-z]/, "Debe contener al menos una minúscula")
+  .regex(/[0-9]/, "Debe contener al menos un número")
+  .regex(/[^A-Za-z0-9]/, "Debe contener al menos un carácter especial");
+
+function firstZodMessage(schema: z.ZodType, value: string): string | null {
+  const result = schema.safeParse(value);
+  return result.success ? null : (result.error.issues[0]?.message ?? null);
+}
+
 export function UserFormDialog({
   open,
   onOpenChange,
@@ -51,6 +78,7 @@ export function UserFormDialog({
   const isEdit = user != null;
 
   const [formValues, setFormValues] = useState<FormValues>(EMPTY_FORM);
+  const [errors, setErrors] = useState<Partial<FormValues>>({});
 
   useEffect(() => {
     if (!open) return;
@@ -59,6 +87,7 @@ export function UserFormDialog({
         ? { username: user.username, name: user.name, password: "", role: user.role }
         : EMPTY_FORM,
     );
+    setErrors({});
   }, [open, user]);
 
   const mutation = useMutation({
@@ -78,29 +107,33 @@ export function UserFormDialog({
       onOpenChange(false);
     },
     onError: (err) => {
-      const message =
-        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-        "Error guardando usuario";
-      toast.error(message);
+      const { error, details } = (err as { response?: { data?: { error?: string; details?: { message: string }[] } } })
+        ?.response?.data ?? {};
+      const detail = details?.map((d) => d.message).join(" · ");
+      toast.error(detail ?? error ?? "Error guardando usuario");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const { username, name, password, role } = formValues;
-    if (username.trim().length < 3 || name.trim().length < 2) {
-      toast.error("Usuario (mínimo 3) y nombre son obligatorios");
+    const { username, name, password } = formValues;
+
+    // Validación en vivo con los mismos criterios del backend
+    const nextErrors: Partial<FormValues> = {
+      username: firstZodMessage(usernameSchema, username) ?? undefined,
+      name: name.trim().length < 2 ? "El nombre es obligatorio" : undefined,
+      password: password ? firstZodMessage(passwordSchema, password) ?? undefined : undefined,
+    };
+    setErrors(nextErrors);
+    if (nextErrors.username || nextErrors.name || nextErrors.password) {
       return;
     }
-    if (!isEdit && password.length < 8) {
-      toast.error("La contraseña debe tener al menos 8 caracteres");
-      return;
-    }
+
     mutation.mutate({
       username: username.trim().toLowerCase(),
       name: name.trim(),
       password,
-      role,
+      role: formValues.role,
     });
   };
 
@@ -120,7 +153,11 @@ export function UserFormDialog({
               onChange={(e) => setFormValues((v) => ({ ...v, username: e.target.value }))}
               placeholder="nombre.usuario"
               autoComplete="off"
+              aria-invalid={!!errors.username}
             />
+            {errors.username && (
+              <p className="text-xs text-destructive">{errors.username}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -130,7 +167,11 @@ export function UserFormDialog({
               value={formValues.name}
               onChange={(e) => setFormValues((v) => ({ ...v, name: e.target.value }))}
               placeholder="Nombre y apellido"
+              aria-invalid={!!errors.name}
             />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -163,7 +204,17 @@ export function UserFormDialog({
               onChange={(e) => setFormValues((v) => ({ ...v, password: e.target.value }))}
               placeholder={isEdit ? "Dejar vacío para no cambiar" : "••••••••"}
               autoComplete="new-password"
+              aria-invalid={!!errors.password}
             />
+            {errors.password ? (
+              <p className="text-xs text-destructive">{errors.password}</p>
+            ) : (
+              !isEdit && (
+                <p className="text-xs text-muted-foreground">
+                  Mínimo 8 caracteres con mayúscula, minúscula, número y símbolo.
+                </p>
+              )
+            )}
           </div>
 
           <DialogFooter>
