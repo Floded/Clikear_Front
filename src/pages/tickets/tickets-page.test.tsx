@@ -161,6 +161,7 @@ describe("TicketsPage", () => {
 
     await screen.findByText("T-001");
     await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+    await user.click(await screen.findByRole("button", { name: "Exportar" }));
 
     await waitFor(() =>
       expect(mockExportTicketsExcel).toHaveBeenCalledWith(
@@ -177,18 +178,15 @@ describe("TicketsPage", () => {
     expect(mockToastSuccess).toHaveBeenCalledWith("Excel descargado");
   });
 
-  it("exporta con el rango de fechas completado", async () => {
+  it("exporta con el rango de fechas elegido en el modal", async () => {
     const user = userEvent.setup();
     renderTicketsPage();
 
     await screen.findByText("T-001");
-    fireEvent.change(screen.getByLabelText("Exportar desde"), {
-      target: { value: "2026-06-01" },
-    });
-    fireEvent.change(screen.getByLabelText("Exportar hasta"), {
-      target: { value: "2026-06-30" },
-    });
     await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+    await user.type(await screen.findByLabelText("Desde"), "2026-06-01");
+    await user.type(screen.getByLabelText("Hasta"), "2026-06-30");
+    await user.click(screen.getByRole("button", { name: "Exportar" }));
 
     await waitFor(() => {
       const [, range] = mockExportTicketsExcel.mock.calls[0];
@@ -208,6 +206,7 @@ describe("TicketsPage", () => {
 
     await screen.findByText("T-001");
     await user.click(screen.getByRole("button", { name: /Exportar Excel/ }));
+    await user.click(await screen.findByRole("button", { name: "Exportar" }));
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("No se pudo exportar"),
