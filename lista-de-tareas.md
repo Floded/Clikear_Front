@@ -32,3 +32,5 @@
 - [x] Login con username (campo "Usuario" en vez de "Email"); `SessionUser` con `username` y `role`.
 - [x] Sidebar: mostrar username y rol; link "Usuarios" visible solo para ADMIN.
 - [x] Página "Usuarios": tabla + diálogo de alta/edición (username, nombre, rol, contraseña) y baja. → Rama `future-login-usuario-roles`; suite 304/304 en verde.
+- [x] Permisos por funcionalidad (`VIEW`/`EDIT`) y acciones masivas en formulario de usuario (**"Todo en lectura"** / **"Todo en edición"**).
+- [x] UI en solo lectura: ocultar acciones de modificación en tickets para usuarios sin permiso de edición (nuevo ticket, cambio/finalización de estado, asignar/liberar). Visor de imágenes de cierre en modal proporcionado a la pantalla.

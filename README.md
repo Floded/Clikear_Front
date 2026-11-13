@@ -22,12 +22,13 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 
 
 ### 1. Panel de Tickets / Hojas de Ruta (`/tickets`)
-* **Barra de Filtros y Búsqueda:** Filtro por estado (Iniciada, Terminada, Abierto), búsqueda por CUE de escuela o número de ticket.
-* **Listado de Hojas de Ruta / Despacho:** Tarjetas contenedoras por Orden de Despacho (`CC0271`) agrupadas por Establecimiento (Ej: Escuelas).
-* **Tabla de Tickets por Escuela:** Listado claro indicando Número de Ticket, Título, Estado y Fecha de Apertura.
-* **Modal / Drawer de Detalle del Ticket:** 
+* **Barra de Filtros y Búsqueda:** Filtro por estado (Abierto, En progreso, Terminado, Reabierto), búsqueda por establecimiento/CUE o ticket, técnico y empleado asignado.
+* **Listado agrupado por establecimiento:** Tarjetas/tablas por establecimiento (CUE) con número de ticket, título, estado, asignado y fecha de apertura.
+* **Modal de detalle del ticket:**
   * Abre al hacer clic en un ticket.
-  * Muestra toda la información: CUE, Nombre de la escuela, Dirección, Distancia en KM, Teléfono del establecimiento, Técnicos asignados y GLPI asociado.
+  * Muestra información del ticket y establecimiento (CUE, nombre, departamento, localidad, dirección, teléfono, distancia, director/a, GLPI, apertura), orden de despacho/técnicos, asignaciones, facturas asociadas.
+  * **Imágenes de cierre:** miniaturas en el detalle; al abrirse se visualizan en un **modal proporcionado a la pantalla** (no pantalla completa), con navegación entre imágenes, contador, descarga y cierre (botón/Escape).
+  * **Permisos de edición (feature `tickets`):** los usuarios sin permiso de edición ven el detalle en solo lectura y no visualizan acciones de modificación (nuevo ticket, cambiar estado, finalizar ticket, asignar/liberar).
 
 ### 2. Panel de Control de Inventario y Custodia (`/inventory`)
 * **Tablas Conmutables (Tabs):**
@@ -45,6 +46,12 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 ### 3. Módulo de Facturación ARCA (`/invoices`)
 * **Listado de Facturas / Comprobantes:** Visualización del estado del trámite en ARCA (`PENDING`, `APPROVED`, `REJECTED`).
 * **Botón de Acción "Generar Factura":** Dispara la orden a la cola de emisión del backend y muestra estado en tiempo real.
+
+### 4. Usuarios y permisos (`/usuarios`, solo ADMIN)
+* **Gestión de usuarios:** alta, edición y baja de usuarios (username, nombre, rol y contraseña opcional en edición).
+* **Permisos por funcionalidad:** asignación de acceso `Sin acceso` / `Ver` / `Ver y editar` para `tickets`, `organization`, `inventory`, `budgets` e `invoices` (el rol `ADMIN` tiene acceso total implícito).
+* **Acciones masivas en el formulario:** botones **"Todo en lectura"** y **"Todo en edición"** para asignar rápidamente permisos a todas las funcionalidades.
+* **Comportamiento en UI:** las rutas y opciones se filtran según permisos; cuando un usuario tiene solo lectura en una funcionalidad, no se muestran los controles de modificación correspondientes (p. ej. en tickets: creación, cambio/finalización de estado y asignación).
 
 ## 3. Prompt para Agente de Código (OpenCode - Frontend)
 
@@ -74,14 +81,14 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 
 ### Etapa 2 ✅ — Módulo de Tickets & Detalle
 
-- Componentes reutilizables: `TicketStatusBadge`, `TicketFilters` (búsqueda con debounce + CUE + estado + técnico), `TicketDetailDialog`.
-- Listado agrupado por establecimiento (CUE) con tabla de tickets (número, título, estado, apertura) y paginación.
-- Modal de detalle extendido: CUE, nombre, departamento, localidad, dirección, teléfono, distancia en km, director/a, GLPI, fecha de apertura.
-- Orden de despacho asociada con código, fecha, estado y técnicos asignados (chips).
-- Facturas asociadas (voucher, monto, estado, CAE).
-- Cambio de estado desde el modal (`PATCH /api/tickets/:id/status`) con mutación + toast y refresco del listado.
-- Filtros conectados a `GET /api/tickets` (status, establishment, technicianId, search, paginación).
-- Detalle desde `GET /api/tickets/:id` (incluye establishment → dispatchOrder → technicians + invoices).
+- Componentes reutilizables: `TicketStatusBadge`, `TicketFilters` (búsqueda con debounce + filtros), `TicketDetailDialog`.
+- Listado agrupado por establecimiento (CUE) con tabla de tickets y paginación.
+- Modal de detalle extendido: datos del ticket/establecimiento, orden de despacho y técnicos, asignaciones e historial, facturas asociadas.
+- **Imágenes de cierre:** miniaturas en el detalle y visor en modal proporcionado a la pantalla (no fullscreen) con navegación, contador y descarga.
+- Cambio de estado y finalización de ticket (con evidencia) desde el modal (`PATCH /api/tickets/:id/status`, imágenes de cierre).
+- Asignación/liberación de ticket a empleado desde el detalle.
+- Controles de modificación ocultos para usuarios con permiso de solo lectura en `tickets` (creación, estado/finalización y asignación).
+- Filtros conectados a `GET /api/tickets`; detalle desde `GET /api/tickets/:id`.
 - `useDebouncedValue` compartido en `src/hooks/`.
 
 ### Etapa 3 ✅ — Módulo de Inventario & Asignación
@@ -108,6 +115,7 @@ Este documento contiene la arquitectura de interfaz de usuario, diseño de panta
 - Botón **"Nuevo ítem"** en `/inventory` con formulario (nombre, descripción, proveedor, cantidad inicial) → `POST /api/inventory-items`.
 - **Módulo de Proveedores** (`/inventory/suppliers`): botón "Proveedores" en el header de Inventario, listado con búsqueda/paginación y alta (`POST /api/suppliers`) incluyendo el campo `website`.
 - **Hover card de proveedor** en el tab de stock (`supplier-cell.tsx`): al posarse sobre el nombre se consulta `GET /api/suppliers/:id` y se muestra un card flotante (portal + posición calculada, sin modal) con teléfono, email y página web.
+- **Usuarios y permisos** (`/usuarios`, solo ADMIN): gestión de usuarios y permisos por funcionalidad (`VIEW`/`EDIT`), con acciones masivas **"Todo en lectura"** / **"Todo en edición"** en el formulario. La UI oculta acciones de modificación para usuarios sin permiso de edición en la funcionalidad correspondiente (aplicado en tickets).
 
 ## 5. Testing
 
