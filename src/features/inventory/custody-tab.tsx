@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { dateRangeToParams } from "@/lib/download";
+import { ExportExcelDialog } from "@/components/shared/export-excel-dialog";
 import {
   Dialog,
   DialogContent,
@@ -50,8 +50,7 @@ export function CustodyTab() {
   const [returnQty, setReturnQty] = useState<string>("");
   const [returnDate, setReturnDate] = useState<string>("");
   const [returnNotes, setReturnNotes] = useState<string>("");
-  const [exportFrom, setExportFrom] = useState("");
-  const [exportTo, setExportTo] = useState("");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const employeesQuery = useQuery({
     queryKey: ["employees", debouncedSearch, activeFilter, page],
@@ -73,8 +72,12 @@ export function CustodyTab() {
 
   // Exporta las asignaciones filtradas por rango de entrega (sin paginar)
   const exportMutation = useMutation({
-    mutationFn: () => exportAssignmentsExcel(dateRangeToParams(exportFrom, exportTo)),
-    onSuccess: () => toast.success("Excel descargado"),
+    mutationFn: (range: { from?: string; to?: string }) =>
+      exportAssignmentsExcel(range),
+    onSuccess: () => {
+      toast.success("Excel descargado");
+      setExportOpen(false);
+    },
     onError: () => toast.error("No se pudo exportar"),
   });
 
@@ -131,28 +134,10 @@ export function CustodyTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <Input
-          type="date"
-          aria-label="Exportar desde"
-          className="w-36"
-          value={exportFrom}
-          onChange={(e) => setExportFrom(e.target.value)}
-        />
-        <Input
-          type="date"
-          aria-label="Exportar hasta"
-          className="w-36"
-          value={exportTo}
-          onChange={(e) => setExportTo(e.target.value)}
-        />
-        <Button
-          variant="outline"
-          disabled={exportMutation.isPending}
-          onClick={() => exportMutation.mutate()}
-        >
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={() => setExportOpen(true)}>
           <Download className="size-4" aria-hidden />
-          {exportMutation.isPending ? "Exportando…" : "Exportar Excel"}
+          Exportar Excel
         </Button>
       </div>
 
@@ -384,6 +369,15 @@ export function CustodyTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de exportación con rango de fechas */}
+      <ExportExcelDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        title="Exportar asignaciones a Excel"
+        pending={exportMutation.isPending}
+        onExport={(range) => exportMutation.mutate(range)}
+      />
     </div>
   );
 }
