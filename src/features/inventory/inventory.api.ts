@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-
+import { downloadExcel } from "@/lib/download";
 import type {
   Assignment,
   CustodyResponse,
@@ -64,6 +64,14 @@ export async function createSupplier(input: {
 }): Promise<Supplier> {
   const { data } = await api.post<Supplier>("/suppliers", input);
   return data;
+}
+
+// Exporta todas las asignaciones de inventario a Excel (rango de entrega opcional)
+export async function exportAssignmentsExcel(range?: {
+  from?: string;
+  to?: string;
+}): Promise<void> {
+  await downloadExcel("/assignments/export", "asignaciones.xlsx", range);
 }
 
 export async function fetchAssignments(query: {

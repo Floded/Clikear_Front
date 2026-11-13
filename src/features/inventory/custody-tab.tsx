@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const TODAY = new Date().toISOString().slice(0, 10);
-import { Input } from "@/components/ui/input";
-import {
+import { Input } from "@/components/ui/input";import {
   Select,
   SelectContent,
   SelectItem,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExportExcelDialog } from "@/components/shared/export-excel-dialog";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +26,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-import { fetchCustody, returnAssignment } from "@/features/inventory/inventory.api";
+import {
+  exportAssignmentsExcel,
+  fetchCustody,
+  returnAssignment,
+} from "@/features/inventory/inventory.api";
 import type { Assignment } from "@/features/inventory/inventory.types";
 import { fetchEmployees } from "@/features/organization/organization.api";
 import type { Employee } from "@/features/organization/organization.types";
@@ -45,6 +50,7 @@ export function CustodyTab() {
   const [returnQty, setReturnQty] = useState<string>("");
   const [returnDate, setReturnDate] = useState<string>("");
   const [returnNotes, setReturnNotes] = useState<string>("");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const employeesQuery = useQuery({
     queryKey: ["employees", debouncedSearch, activeFilter, page],
@@ -64,8 +70,18 @@ export function CustodyTab() {
     enabled: custodyOpen && selectedEmployee !== null,
   });
 
-  const returnMutation = useMutation({
-    mutationFn: (input: { id: number; quantity?: number; returnDate?: string; notes?: string }) =>
+  // Exporta las asignaciones filtradas por rango de entrega (sin paginar)
+  const exportMutation = useMutation({
+    mutationFn: (range: { from?: string; to?: string }) =>
+      exportAssignmentsExcel(range),
+    onSuccess: () => {
+      toast.success("Excel descargado");
+      setExportOpen(false);
+    },
+    onError: () => toast.error("No se pudo exportar"),
+  });
+
+  const returnMutation = useMutation({    mutationFn: (input: { id: number; quantity?: number; returnDate?: string; notes?: string }) =>
       returnAssignment(input.id, {
         quantity: input.quantity,
         returnDate: input.returnDate,
@@ -118,6 +134,13 @@ export function CustodyTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={() => setExportOpen(true)}>
+          <Download className="size-4" aria-hidden />
+          Exportar Excel
+        </Button>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
         <Input
           placeholder="Buscar empleado…"
@@ -346,6 +369,15 @@ export function CustodyTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de exportación con rango de fechas */}
+      <ExportExcelDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        title="Exportar asignaciones a Excel"
+        pending={exportMutation.isPending}
+        onExport={(range) => exportMutation.mutate(range)}
+      />
     </div>
   );
 }

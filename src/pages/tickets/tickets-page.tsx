@@ -1,12 +1,19 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExportExcelDialog } from "@/components/shared/export-excel-dialog";
 
 import { fetchEmployees } from "@/features/organization/organization.api";
-import { fetchTickets, fetchTechnicians } from "@/features/tickets/tickets.api";
+import {
+  exportTicketsExcel,
+  fetchTickets,
+  fetchTechnicians,
+} from "@/features/tickets/tickets.api";
 import { TicketFilters, type TicketFiltersState } from "@/features/tickets/ticket-filters";
 import { TicketStatusBadge } from "@/features/tickets/ticket-status-badge";
 import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog";
@@ -27,6 +34,7 @@ export function TicketsPage() {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [newTicketOpen, setNewTicketOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const queryFilters = useMemo(
     () => ({
@@ -81,6 +89,26 @@ export function TicketsPage() {
     setDetailOpen(true);
   };
 
+  // Exporta respetando los filtros activos y el rango de apertura (sin paginar)
+  const exportMutation = useMutation({
+    mutationFn: (range: { from?: string; to?: string }) =>
+      exportTicketsExcel(
+        {
+          status: queryFilters.status,
+          establishment: queryFilters.establishment,
+          technicianId: queryFilters.technicianId,
+          employeeId: queryFilters.employeeId,
+          search: queryFilters.search,
+        },
+        range,
+      ),
+    onSuccess: () => {
+      toast.success("Excel descargado");
+      setExportOpen(false);
+    },
+    onError: () => toast.error("No se pudo exportar"),
+  });
+
   return (
     <section className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -90,7 +118,16 @@ export function TicketsPage() {
             Hojas de ruta y tickets por establecimiento.
           </p>
         </div>
-        <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setExportOpen(true)}
+          >
+            <Download className="size-4" aria-hidden />
+            Exportar Excel
+          </Button>
+          <Button onClick={() => setNewTicketOpen(true)}>Nuevo ticket</Button>
+        </div>
       </div>
 
       <TicketFilters
@@ -212,6 +249,13 @@ export function TicketsPage() {
         onOpenChange={setDetailOpen}
       />
       <NewTicketDialog open={newTicketOpen} onOpenChange={setNewTicketOpen} />
+      <ExportExcelDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        title="Exportar tickets a Excel"
+        pending={exportMutation.isPending}
+        onExport={(range) => exportMutation.mutate(range)}
+      />
     </section>
   );
 }
