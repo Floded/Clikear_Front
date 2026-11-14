@@ -13,6 +13,7 @@ import { TicketsPage } from './pages/tickets/tickets-page'
 import { BudgetsPage } from './pages/budgets/budgets-page'
 import { OrganizationPage } from './pages/organization/organization-page'
 import { UsersPage } from './pages/users/users-page'
+import { CompanySettingsPage } from './pages/settings/company-settings-page'
 import { LoginPage } from './pages/login-page'
 import { useSession } from '@/features/auth/use-session'
 import { getFirstAllowedPath } from '@/lib/permissions'
@@ -60,6 +61,7 @@ createRoot(document.getElementById('root')!).render(
                 </Route>
                 <Route element={<ProtectedRoute adminOnly />}>
                   <Route path="/usuarios" element={<UsersPage />} />
+                  <Route path="/settings/company" element={<CompanySettingsPage />} />
                 </Route>
                 <Route path="*" element={<IndexRedirect />} />
               </Route>
