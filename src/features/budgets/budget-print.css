@@ -1,0 +1,460 @@
+:root {
+  --budget-ink: #111827;
+  --budget-muted: #4b5563;
+  --budget-line: #d1d5db;
+  --budget-soft: #f3f4f6;
+  --budget-accent: #1f4e79;
+  --budget-accent-soft: #e8f1f8;
+}
+
+.budget-print-dialog {
+  max-width: min(96vw, 980px) !important;
+  width: 100%;
+  max-height: 92vh;
+  overflow: auto;
+  padding: 0 !important;
+  background: #f8fafc !important;
+}
+
+.budget-preview-shell {
+  padding: 1rem;
+}
+
+.budget-print-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+}
+
+.budget-document {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  background: #fff;
+  color: var(--budget-ink);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  padding: 14mm 14mm 12mm;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.budget-document *,
+.budget-document *::before,
+.budget-document *::after {
+  box-sizing: border-box;
+}
+
+.budget-header {
+  position: relative;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--budget-accent);
+  break-inside: avoid;
+}
+
+.budget-header-accent {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--budget-accent) 0%, #4f83b3 55%, #d9e8f5 100%);
+  margin-bottom: 14px;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.budget-header-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.budget-company-block {
+  flex: 1 1 55%;
+  min-width: 0;
+}
+
+.budget-company-brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.budget-company-logo,
+.budget-company-logo-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.budget-company-logo {
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 4px;
+}
+
+.budget-company-logo-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--budget-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.budget-company-name {
+  margin: 0;
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--budget-accent);
+  line-height: 1.1;
+}
+
+.budget-company-legal,
+.budget-company-meta,
+.budget-company-details p {
+  margin: 2px 0 0;
+  color: var(--budget-muted);
+  font-size: 9pt;
+}
+
+.budget-company-details {
+  margin-top: 6px;
+}
+
+.budget-header-meta {
+  flex: 0 1 40%;
+  min-width: 240px;
+}
+
+.budget-document-kicker {
+  margin: 0;
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--budget-muted);
+}
+
+.budget-document-title {
+  margin: 2px 0 8px;
+  font-size: 20pt;
+  line-height: 1.1;
+  color: var(--budget-ink);
+}
+
+.budget-header-meta-list,
+.budget-card dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.budget-info-row {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.budget-info-row dt {
+  margin: 0;
+  color: var(--budget-muted);
+  font-size: 9pt;
+}
+
+.budget-info-row dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+}
+
+.budget-section {
+  margin-top: 16px;
+  break-inside: avoid;
+}
+
+.budget-parties {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.budget-card {
+  border: 1px solid var(--budget-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fff;
+  break-inside: avoid;
+}
+
+.budget-card h2,
+.budget-notes h2 {
+  margin: 0 0 8px;
+  font-size: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--budget-accent);
+}
+
+.budget-card .budget-info-row dd {
+  text-align: left;
+}
+
+.budget-table-wrap {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--budget-line);
+  border-radius: 10px;
+}
+
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.budget-table thead {
+  display: table-header-group;
+}
+
+.budget-table tfoot {
+  display: table-footer-group;
+}
+
+.budget-table th,
+.budget-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--budget-line);
+  vertical-align: top;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.budget-table th {
+  background: var(--budget-accent);
+  color: #fff;
+  font-size: 9.5pt;
+  font-weight: 700;
+  text-align: left;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.budget-table tbody tr:nth-child(even) td {
+  background: #fbfdff;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.budget-table tbody tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.budget-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.budget-table .col-concept {
+  width: auto;
+  text-align: left;
+}
+
+.budget-table .col-qty {
+  width: 14%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.budget-table .col-unit,
+.budget-table .col-subtotal {
+  width: 20%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.budget-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 12px;
+  align-items: start;
+}
+
+.budget-notes {
+  border: 1px solid var(--budget-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-height: 100%;
+  break-inside: avoid;
+}
+
+.budget-notes p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.budget-totals {
+  border: 1px solid var(--budget-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--budget-accent-soft);
+  break-inside: avoid;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.budget-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.budget-total-final {
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid #b9d0e6;
+  font-size: 12pt;
+  color: var(--budget-accent);
+}
+
+.budget-total-final strong {
+  font-size: 14pt;
+}
+
+.budget-total-note {
+  margin: 8px 0 0;
+  font-size: 8.5pt;
+  color: var(--budget-muted);
+}
+
+.budget-footer {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px solid var(--budget-line);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 8.5pt;
+  color: var(--budget-muted);
+  break-inside: avoid;
+}
+
+.budget-footer-page::after {
+  content: "";
+}
+
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ocultar toda la UI y mostrar solo el documento del presupuesto */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .budget-document,
+  .budget-document * {
+    visibility: visible !important;
+  }
+
+  /* Neutralizar overlay y layout del modal/portal para que el documento fluya en la hoja */
+  [data-slot="dialog-overlay"] {
+    display: none !important;
+  }
+
+  [data-radix-portal],
+  [data-slot="dialog-portal"] {
+    position: static !important;
+  }
+
+  .budget-print-dialog {
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: none !important;
+    width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: #000 !important;
+  }
+
+  .budget-preview-shell {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .budget-document {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .no-print,
+  .budget-print-actions,
+  [data-slot="dialog-close"] {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 720px) {
+  .budget-header-content,
+  .budget-parties,
+  .budget-bottom {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .budget-header-meta {
+    min-width: 0;
+  }
+
+  .budget-info-row dd {
+    text-align: left;
+  }
+
+  .budget-table .col-qty,
+  .budget-table .col-unit,
+  .budget-table .col-subtotal {
+    white-space: normal;
+  }
+}
