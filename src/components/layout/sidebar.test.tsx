@@ -51,6 +51,19 @@ const ALL_PERMISSIONS = [
   { feature: "invoices", access: "EDIT" },
 ] as const;
 
+function adminSession() {
+  return {
+    isPending: false,
+    data: {
+      id: 1,
+      username: "ana",
+      name: "Ana Pérez",
+      role: "ADMIN",
+      permissions: [...ALL_PERMISSIONS],
+    },
+  } as SessionResult;
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockLogout.mockResolvedValue(undefined);
@@ -137,6 +150,27 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: "Tickets" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Organización" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Inventario" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Configuración/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Usuarios" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Configuración de empresa" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("muestra el menú de configuración para administradores", async () => {
+    const user = userEvent.setup();
+    mockUseSession.mockReturnValue(adminSession());
+    renderSidebar();
+
+    const settingsToggle = screen.getByRole("button", { name: /Configuración/i });
+    expect(settingsToggle).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Usuarios" })).not.toBeInTheDocument();
+
+    await user.click(settingsToggle);
+
+    expect(screen.getByRole("link", { name: "Usuarios" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Configuración de empresa" }),
+    ).toBeInTheDocument();
   });
 });

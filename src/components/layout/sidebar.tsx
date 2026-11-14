@@ -1,6 +1,18 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Boxes, Building2, Calculator, ClipboardList, LogOut, ReceiptText, UserCog, Users } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Boxes,
+  Building2,
+  Calculator,
+  ChevronDown,
+  ClipboardList,
+  LogOut,
+  ReceiptText,
+  Settings,
+  UserCog,
+  Users,
+} from "lucide-react";
 
 import { cn } from "cn";
 import logoUrl from "@/assets/logo.png";
@@ -28,11 +40,29 @@ const ROLE_LABELS: Record<string, string> = {
   REVISADOR: "Revisador",
 };
 
+const adminSettingsItems = [
+  { to: "/usuarios", label: "Usuarios", icon: UserCog },
+  { to: "/settings/company", label: "Configuración de empresa", icon: Building2 },
+] as const;
+
 export function Sidebar() {
   const { data: user } = useSession();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const isAdmin = user?.role === "ADMIN";
+  const isSettingsActive = adminSettingsItems.some((item) =>
+    location.pathname.startsWith(item.to),
+  );
+  const [isSettingsOpen, setIsSettingsOpen] = useState(isSettingsActive);
+
+  useEffect(() => {
+    if (isSettingsActive) {
+      setIsSettingsOpen(true);
+    }
+  }, [isSettingsActive]);
+
   // Alterna el tema y asegura que la clase .dark esté en el HTML para Tailwind
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -80,38 +110,49 @@ export function Sidebar() {
           </NavLink>
         ))}
 
-        {/* Gestión administrativa: solo para administradores */}
-        {user?.role === "ADMIN" && (
-          <>
-            <NavLink
-              to="/usuarios"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-                  isActive
-                    ? "bg-accent font-medium text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                )
-              }
+        {isAdmin && (
+          <div className="flex flex-col gap-1">
+            <button
+              type="button"
+              className={cn(
+                "flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                isSettingsActive
+                  ? "bg-accent font-medium text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+              )}
+              aria-expanded={isSettingsOpen}
+              aria-controls="settings-submenu"
+              onClick={() => setIsSettingsOpen((open) => !open)}
             >
-              <UserCog className="size-4" aria-hidden />
-              Usuarios
-            </NavLink>
-            <NavLink
-              to="/settings/company"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-                  isActive
-                    ? "bg-accent font-medium text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                )
-              }
-            >
-              <Building2 className="size-4" aria-hidden />
-              Configuración de empresa
-            </NavLink>
-          </>
+              <Settings className="size-4" aria-hidden />
+              <span className="flex-1 text-left">Configuración</span>
+              <ChevronDown
+                className={cn("size-4 transition-transform", isSettingsOpen && "rotate-180")}
+                aria-hidden
+              />
+            </button>
+            {isSettingsOpen && (
+              <div id="settings-submenu" className="ml-4 flex flex-col gap-1 border-l pl-2">
+                {adminSettingsItems.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive
+                          ? "bg-accent font-medium text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                      )
+                    }
+                  >
+                    <Icon className="size-4" aria-hidden />
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </nav>
 
