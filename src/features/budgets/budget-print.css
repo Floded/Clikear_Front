@@ -384,30 +384,37 @@
     visibility: hidden !important;
   }
 
-  .budget-print-dialog,
-  .budget-print-dialog * {
+  .budget-document,
+  .budget-document * {
     visibility: visible !important;
   }
 
-  [data-slot="dialog-overlay"] {
+  [data-slot="dialog-overlay"],
+  .no-print,
+  .budget-print-actions,
+  [data-slot="dialog-close"] {
     display: none !important;
   }
 
   [data-radix-portal],
-  [data-slot="dialog-portal"] {
+  [data-slot="dialog-portal"],
+  [data-radix-popper-content-wrapper] {
     position: static !important;
     inset: auto !important;
     display: block !important;
     width: 100% !important;
+    max-width: none !important;
     height: auto !important;
     min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: visible !important;
     transform: none !important;
   }
 
   .budget-print-dialog {
-    position: absolute !important;
-    inset: 0 !important;
+    position: static !important;
+    inset: auto !important;
     display: block !important;
     width: 100% !important;
     max-width: none !important;
@@ -421,7 +428,7 @@
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    background: #fff !important;
+    background: transparent !important;
     transform: none !important;
   }
 
@@ -435,7 +442,9 @@
 
   .budget-document {
     display: block !important;
-    position: static !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
     width: 100% !important;
     max-width: none !important;
     min-height: 0 !important;
@@ -444,12 +453,6 @@
     border: none !important;
     box-shadow: none !important;
     background: #fff !important;
-  }
-
-  .no-print,
-  .budget-print-actions,
-  [data-slot="dialog-close"] {
-    display: none !important;
   }
 }
 
