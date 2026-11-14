@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -52,34 +52,37 @@ describe("BudgetPrintDialog", () => {
   it("renders the budget header, client and status", () => {
     renderDialog(baseBudget);
 
-    expect(screen.getByRole("heading", { name: "Presupuesto PPT-0007" })).toBeInTheDocument();
-    expect(screen.getByText("Escuela 25 de Mayo")).toBeInTheDocument();
-    expect(screen.getByText("700083300")).toBeInTheDocument();
-    expect(screen.getByText("Enviado")).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Presupuesto PPT-0007" })).toBeInTheDocument();
+    expect(within(dialog).getByText("Escuela 25 de Mayo")).toBeInTheDocument();
+    expect(within(dialog).getByText("700083300")).toBeInTheDocument();
+    expect(within(dialog).getByText("Enviado")).toBeInTheDocument();
   });
 
   it("renders line details and the formatted total", () => {
     renderDialog(baseBudget);
 
-    expect(screen.getByText("Cable HDMI")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
-    expect(screen.getByText(moneyRegex(750))).toBeInTheDocument();
-    // subtotal de la línea y total del presupuesto coinciden en este fixture
-    expect(screen.getAllByText(moneyRegex(1500))).toHaveLength(2);
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("Cable HDMI")).toBeInTheDocument();
+    expect(within(dialog).getByText("2")).toBeInTheDocument();
+    expect(within(dialog).getByText(moneyRegex(750))).toBeInTheDocument();
+    expect(within(dialog).getAllByText(moneyRegex(1500))).toHaveLength(2);
   });
 
   it("renders notes when present", () => {
     renderDialog(baseBudget);
 
-    expect(screen.getByText("Notas")).toBeInTheDocument();
-    expect(screen.getByText("Insumos generales")).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("Notas")).toBeInTheDocument();
+    expect(within(dialog).getByText("Insumos generales")).toBeInTheDocument();
   });
 
   it("falls back to placeholders when optional data is missing", () => {
     renderDialog({ ...baseBudget, establishmentCue: null, notes: null });
 
-    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
-    expect(screen.getByText("Notas")).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getAllByText("—").length).toBeGreaterThan(0);
+    expect(within(dialog).getByText("Notas")).toBeInTheDocument();
   });
 
   it("closes the dialog when clicking Cerrar", async () => {
