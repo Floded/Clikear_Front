@@ -381,7 +381,7 @@
   }
 
   /* Evita que el layout oculto de la app desplace el documento en la impresión */
-  body > *:not([data-slot="dialog-portal"]):not([data-radix-portal]) {
+  body > *:not([data-slot="dialog-portal"]):not([data-radix-portal]):not(:has(.budget-print-dialog)) {
     display: none !important;
   }
 
