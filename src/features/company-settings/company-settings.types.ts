@@ -4,6 +4,8 @@ export interface CompanySettings {
   legalName: string | null;
   logoUrl: string | null;
   logoPath: string | null;
+  signatureUrl: string | null;
+  signaturePath: string | null;
 
   responsibleName: string | null;
   responsiblePosition: string | null;

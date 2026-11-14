@@ -27,3 +27,17 @@ export async function deleteCompanyLogo(): Promise<CompanySettings> {
   const { data } = await api.delete<CompanySettings>("/company-settings/logo");
   return data;
 }
+
+export async function uploadCompanySignature(file: File): Promise<CompanySettings> {
+  const formData = new FormData();
+  formData.append("signature", file);
+  const { data } = await api.post<CompanySettings>("/company-settings/signature", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function deleteCompanySignature(): Promise<CompanySettings> {
+  const { data } = await api.delete<CompanySettings>("/company-settings/signature");
+  return data;
+}

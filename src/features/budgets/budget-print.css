@@ -340,6 +340,44 @@
   color: var(--budget-muted);
 }
 
+.budget-signature-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  break-inside: avoid;
+}
+
+.budget-signature {
+  width: min(100%, 260px);
+  text-align: center;
+}
+
+.budget-signature-image {
+  display: block;
+  max-width: 100%;
+  max-height: 80px;
+  margin: 0 auto 6px;
+  object-fit: contain;
+}
+
+.budget-signature-line {
+  border-top: 1px solid var(--budget-ink);
+  margin: 4px 0 6px;
+}
+
+.budget-signature-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 9.5pt;
+  color: var(--budget-ink);
+}
+
+.budget-signature-position {
+  margin: 2px 0 0;
+  font-size: 8.5pt;
+  color: var(--budget-muted);
+}
+
 .budget-footer {
   margin-top: 18px;
   padding-top: 10px;

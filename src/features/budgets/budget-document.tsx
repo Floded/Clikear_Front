@@ -97,6 +97,9 @@ export function BudgetDocument({
   companySettings?: CompanySettings | null;
 }) {
   const issuePlace = formatIssuePlace(companySettings);
+  const signatureName = companySettings?.responsibleName?.trim() || null;
+  const signaturePosition = companySettings?.responsiblePosition?.trim() || null;
+  const hasSignature = Boolean(companySettings?.signatureUrl);
 
   return (
     <article className="budget-document" aria-label={`Presupuesto ${budget.code}`}>
@@ -173,6 +176,21 @@ export function BudgetDocument({
           <p className="budget-total-note">Importes expresados en moneda local (ARS).</p>
         </div>
       </section>
+
+      {hasSignature && (
+        <section className="budget-section budget-signature-section" aria-label="Firma">
+          <div className="budget-signature">
+            <img
+              src={companySettings!.signatureUrl!}
+              alt="Firma autorizada"
+              className="budget-signature-image"
+            />
+            <div className="budget-signature-line" />
+            {signatureName && <p className="budget-signature-name">{signatureName}</p>}
+            {signaturePosition && <p className="budget-signature-position">{signaturePosition}</p>}
+          </div>
+        </section>
+      )}
 
       <footer className="budget-footer">
         <div className="budget-footer-contact">

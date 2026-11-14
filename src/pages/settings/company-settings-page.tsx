@@ -12,8 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/use-session";
 import {
   deleteCompanyLogo,
+  deleteCompanySignature,
   updateCompanySettings,
   uploadCompanyLogo,
+  uploadCompanySignature,
 } from "@/features/company-settings/company-settings.api";
 import type { CompanySettings, UpdateCompanySettingsInput } from "@/features/company-settings/company-settings.types";
 import { companySettingsQueryKey, useCompanySettings } from "@/features/company-settings/use-company-settings";
@@ -133,9 +135,11 @@ export function CompanySettingsPage() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const settingsQuery = useCompanySettings({ enabled: session?.role === "ADMIN" });
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+  const signatureInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [selectedLogo, setSelectedLogo] = useState<File | null>(null);
+  const [selectedSignature, setSelectedSignature] = useState<File | null>(null);
 
   useEffect(() => {
     if (settingsQuery.data) {
@@ -159,7 +163,7 @@ export function CompanySettingsPage() {
     onSuccess: (data) => {
       queryClient.setQueryData(companySettingsQueryKey, data);
       setSelectedLogo(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (logoInputRef.current) logoInputRef.current.value = "";
       toast.success("Logotipo actualizado");
     },
     onError: (error) => {
@@ -172,7 +176,7 @@ export function CompanySettingsPage() {
     onSuccess: (data) => {
       queryClient.setQueryData(companySettingsQueryKey, data);
       setSelectedLogo(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (logoInputRef.current) logoInputRef.current.value = "";
       toast.success("Logotipo eliminado");
     },
     onError: (error) => {
@@ -180,8 +184,38 @@ export function CompanySettingsPage() {
     },
   });
 
+  const uploadSignatureMutation = useMutation({
+    mutationFn: (file: File) => uploadCompanySignature(file),
+    onSuccess: (data) => {
+      queryClient.setQueryData(companySettingsQueryKey, data);
+      setSelectedSignature(null);
+      if (signatureInputRef.current) signatureInputRef.current.value = "";
+      toast.success("Firma actualizada");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "No se pudo subir la firma"));
+    },
+  });
+
+  const deleteSignatureMutation = useMutation({
+    mutationFn: deleteCompanySignature,
+    onSuccess: (data) => {
+      queryClient.setQueryData(companySettingsQueryKey, data);
+      setSelectedSignature(null);
+      if (signatureInputRef.current) signatureInputRef.current.value = "";
+      toast.success("Firma eliminada");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "No se pudo eliminar la firma"));
+    },
+  });
+
   const isBusy =
-    saveMutation.isPending || uploadLogoMutation.isPending || deleteLogoMutation.isPending;
+    saveMutation.isPending ||
+    uploadLogoMutation.isPending ||
+    deleteLogoMutation.isPending ||
+    uploadSignatureMutation.isPending ||
+    deleteSignatureMutation.isPending;
 
   const hasChanges = useMemo(() => {
     if (!settingsQuery.data) return false;
@@ -215,6 +249,19 @@ export function CompanySettingsPage() {
   const handleDeleteLogo = () => {
     if (!window.confirm("¿Eliminar el logotipo actual? Esta acción no se puede deshacer.")) return;
     deleteLogoMutation.mutate();
+  };
+
+  const handleUploadSignature = () => {
+    if (!selectedSignature) {
+      toast.error("Seleccioná un archivo de firma");
+      return;
+    }
+    uploadSignatureMutation.mutate(selectedSignature);
+  };
+
+  const handleDeleteSignature = () => {
+    if (!window.confirm("¿Eliminar la firma actual? Esta acción no se puede deshacer.")) return;
+    deleteSignatureMutation.mutate();
   };
 
   return (
@@ -282,7 +329,7 @@ export function CompanySettingsPage() {
                       <Label htmlFor="logo">Cargar o reemplazar logotipo</Label>
                       <Input
                         id="logo"
-                        ref={fileInputRef}
+                        ref={logoInputRef}
                         type="file"
                         accept="image/png,image/jpeg,image/jpg,image/svg+xml"
                         disabled={isBusy}
@@ -333,6 +380,58 @@ export function CompanySettingsPage() {
                 value={form.responsiblePosition}
                 onChange={updateField("responsiblePosition")}
               />
+              <div className="space-y-3 md:col-span-2">
+                <Label>Firma (imagen)</Label>
+                <div className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-start">
+                  <div className="flex h-24 w-56 items-center justify-center overflow-hidden rounded-md border bg-muted/30">
+                    {settingsQuery.data.signatureUrl ? (
+                      <img
+                        src={settingsQuery.data.signatureUrl}
+                        alt="Firma de la empresa"
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <span className="px-2 text-center text-xs text-muted-foreground">
+                        Sin firma
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signature">Cargar o reemplazar firma</Label>
+                      <Input
+                        id="signature"
+                        ref={signatureInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                        disabled={isBusy}
+                        onChange={(e) => setSelectedSignature(e.target.files?.[0] ?? null)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Formatos: PNG, JPG, JPEG o SVG. Tamaño máximo: 2 MB. Se mostrará en el presupuesto al imprimir o guardar como PDF.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!selectedSignature || isBusy}
+                        onClick={handleUploadSignature}
+                      >
+                        {uploadSignatureMutation.isPending ? "Subiendo…" : "Subir firma"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={!settingsQuery.data.signatureUrl || isBusy}
+                        onClick={handleDeleteSignature}
+                      >
+                        {deleteSignatureMutation.isPending ? "Eliminando…" : "Eliminar firma"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

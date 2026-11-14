@@ -4,14 +4,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BudgetPrintDialog } from "@/features/budgets/budget-print-dialog";
 import type { Budget } from "@/features/budgets/budget.types";
+import type { CompanySettings } from "@/features/company-settings/company-settings.types";
+import { useCompanySettings } from "@/features/company-settings";
 
 vi.mock("@/features/auth/use-session", () => ({
   useSession: () => ({ data: { role: "ADMIN" } }),
 }));
 
 vi.mock("@/features/company-settings", () => ({
-  useCompanySettings: () => ({ data: null, isLoading: false, isError: false }),
+  useCompanySettings: vi.fn(() => ({ data: null, isLoading: false, isError: false })),
 }));
+
+const mockUseCompanySettings = vi.mocked(useCompanySettings);
 
 const baseBudget: Budget = {
   id: 7,
@@ -30,6 +34,31 @@ const baseBudget: Budget = {
   ],
 };
 
+const companySettingsWithSignature: CompanySettings = {
+  id: 1,
+  commercialName: "Clickear",
+  legalName: "Clickear SRL",
+  logoUrl: null,
+  logoPath: null,
+  signatureUrl: "https://example.com/signature.png",
+  signaturePath: "company/signature.png",
+  responsibleName: "Ricardo Gabriel Lillo Morales",
+  responsiblePosition: "Socio Gerente",
+  address: null,
+  locality: null,
+  province: null,
+  country: null,
+  postalCode: null,
+  email: null,
+  phone: null,
+  taxId: null,
+  grossIncomeNumber: null,
+  rupeNumber: null,
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  updatedBy: null,
+};
+
 const moneyRegex = (value: number) => {
   if (value === 750) return /\$\s*750,00/;
   if (value === 1500) return /\$\s*1\.500,00/;
@@ -45,7 +74,9 @@ function renderDialog(
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
   vi.spyOn(window, "print").mockImplementation(() => {});
+  mockUseCompanySettings.mockReturnValue({ data: null, isLoading: false, isError: false } as any);
 });
 
 describe("BudgetPrintDialog", () => {
@@ -110,5 +141,20 @@ describe("BudgetPrintDialog", () => {
     renderDialog(null);
 
     expect(screen.queryByText(/Presupuesto PPT/)).not.toBeInTheDocument();
+  });
+
+  it("renders company signature in the print document when configured", () => {
+    mockUseCompanySettings.mockReturnValue({
+      data: companySettingsWithSignature,
+      isLoading: false,
+      isError: false,
+    } as any);
+
+    renderDialog(baseBudget);
+
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByAltText("Firma autorizada")).toBeInTheDocument();
+    expect(within(dialog).getByText("Ricardo Gabriel Lillo Morales")).toBeInTheDocument();
+    expect(within(dialog).getByText("Socio Gerente")).toBeInTheDocument();
   });
 });
