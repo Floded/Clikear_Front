@@ -380,6 +380,11 @@
     print-color-adjust: exact;
   }
 
+  /* Evita que el layout oculto de la app desplace el documento en la impresión */
+  body > *:not([data-slot="dialog-portal"]):not([data-radix-portal]) {
+    display: none !important;
+  }
+
   body * {
     visibility: hidden !important;
   }
