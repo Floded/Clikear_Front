@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Boxes, Calculator, ClipboardList, LogOut, ReceiptText, UserCog, Users } from "lucide-react";
+import { Boxes, Building2, Calculator, ClipboardList, LogOut, ReceiptText, UserCog, Users } from "lucide-react";
 
 import { cn } from "cn";
 import logoUrl from "@/assets/logo.png";
@@ -80,22 +80,38 @@ export function Sidebar() {
           </NavLink>
         ))}
 
-        {/* Gestión de usuarios: solo para administradores */}
+        {/* Gestión administrativa: solo para administradores */}
         {user?.role === "ADMIN" && (
-          <NavLink
-            to="/usuarios"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-                isActive
-                  ? "bg-accent font-medium text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-              )
-            }
-          >
-            <UserCog className="size-4" aria-hidden />
-            Usuarios
-          </NavLink>
+          <>
+            <NavLink
+              to="/usuarios"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                  isActive
+                    ? "bg-accent font-medium text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                )
+              }
+            >
+              <UserCog className="size-4" aria-hidden />
+              Usuarios
+            </NavLink>
+            <NavLink
+              to="/settings/company"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                  isActive
+                    ? "bg-accent font-medium text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                )
+              }
+            >
+              <Building2 className="size-4" aria-hidden />
+              Configuración de empresa
+            </NavLink>
+          </>
         )}
       </nav>
 

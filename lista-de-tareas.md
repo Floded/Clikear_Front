@@ -32,3 +32,32 @@
 - [x] Login con username (campo "Usuario" en vez de "Email"); `SessionUser` con `username` y `role`.
 - [x] Sidebar: mostrar username y rol; link "Usuarios" visible solo para ADMIN.
 - [x] Página "Usuarios": tabla + diálogo de alta/edición (username, nombre, rol, contraseña) y baja. → Rama `future-login-usuario-roles`; suite 304/304 en verde.
+- [x] Permisos por funcionalidad (`VIEW`/`EDIT`) y acciones masivas en formulario de usuario (**"Todo en lectura"** / **"Todo en edición"**).
+- [x] UI en solo lectura: ocultar acciones de modificación en tickets para usuarios sin permiso de edición (nuevo ticket, cambio/finalización de estado, asignar/liberar). Visor de imágenes de cierre en modal proporcionado a la pantalla.
+
+### Fase 7 ✅ Configuración de empresa (implementación completada, pendiente operación en entorno)
+> Decisiones: módulo independiente, **solo ADMIN**, datos centralizados (fuente única) para documentos comerciales, logo en **Supabase Storage**. No inventar datos; no modificar reglas de negocio ni diseño PDF de presupuestos en esta etapa.
+
+- [x] **Etapa 3 — Frontend base y gestión de configuración (completada)**
+  - [x] **Navegación y acceso**
+    - [x] Ruta protegida `adminOnly` `/settings/company` en `src/main.tsx`.
+    - [x] Entrada **"Configuración de empresa"** en `Sidebar` (visible solo para ADMIN), integrada al diseño actual.
+  - [x] **Feature frontend** `src/features/company-settings/`
+    - [x] `company-settings.types.ts`: tipos alineados a la API.
+    - [x] `company-settings.api.ts`: `get`, `update`, `uploadLogo`, `deleteLogo` (axios, `FormData`).
+    - [x] `use-company-settings.ts`: query/hook reutilizable con cache (`react-query`) como fuente única para otros módulos.
+  - [x] **Página y formulario** `src/pages/settings/company-settings-page.tsx`
+    - [x] Secciones: A) Identidad (nombre comercial, razón social, logotipo), B) Responsable, C) Contacto, D) Fiscal/comercial.
+    - [x] Carga de datos, edición, guardado, validación básica/errores de API, estados de carga, toasts de éxito/error, confirmación destructiva para eliminar logo.
+    - [x] Logotipo: vista previa, selección, carga/reemplazo y eliminación (URL pública desde Supabase Storage).
+    - [x] Uso de componentes/patrones UI existentes (shadcn/ui), sin duplicar componentes.
+  - [x] **Datos iniciales**: precargados/servidos por backend (sin hardcode en UI).
+  - [x] Validación técnica: `tsc -p tsconfig.json --noEmit` en verde.
+
+- [x] **Etapa 4 — Integración preparada con presupuestos (completada)**
+  - [x] Fuente única disponible para reutilización: `features/company-settings` (`company-settings.api.ts`, `use-company-settings.ts`, `index.ts`) permite consumir configuración empresarial centralizada en presupuestos/otros módulos sin hardcode ni duplicación (sin cambios en diseño PDF ni reglas en esta etapa).
+  - [x] Snapshot histórico documentado como mejora aditiva futura: capturar datos de empresa al emitir el presupuesto para preservar consistencia documental, sin implementación automática en esta etapa.
+
+- [ ] **Etapa 5 — Pruebas y validación (pendiente)**
+  - [ ] Tests de carga/edición/validación/errores y manejo de logo.
+  - [ ] Verificar consumo desde módulo de presupuestos, build y comportamiento ante errores de API.
